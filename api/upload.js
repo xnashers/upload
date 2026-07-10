@@ -1,44 +1,70 @@
-async function uploadImage() {
-  const file = fileInput.files[0];
-  if (!file) return alert("Select an image first");
+export default async function handler(req, res) {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  status.textContent = "Uploading...";
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-  const reader = new FileReader();
-  reader.onload = async () => {
-    const base64 = reader.result.split(',')[1];
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    try {
-      const res = await fetch('https://YOUR-VERCEL-URL.vercel.app/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+  const { filename, content, message } = req.body || {};
+
+  if (!filename || !content) {
+    return res.status(400).json({ error: 'Missing filename or content' });
+  }
+
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const REPO_OWNER = 'xnashers';
+  const REPO_NAME = 'upload';
+
+  if (!GITHUB_TOKEN) {
+    console.error("GITHUB_TOKEN is missing");
+    return res.status(500).json({ error: 'Server configuration error (missing token)' });
+  }
+
+  const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const path = `uploads/${Date.now()}-${safeFilename}`;
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'Pocket-Farm-Uploader'
+        },
         body: JSON.stringify({
-          filename: file.name,
-          content: base64,
-          message: `Upload ${file.name}`
+          message: message || `Upload ${filename}`,
+          content: content,
+          branch: 'main'
         })
-      });
-
-      console.log("Response status:", res.status);
-      const text = await res.text();
-      console.log("Raw response:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        data = { error: text };
       }
+    );
 
-      if (res.ok) {
-        status.innerHTML = `✅ Success!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
-      } else {
-        status.textContent = `❌ ${data.error || res.status}`;
-      }
-    } catch (err) {
-      status.textContent = "❌ Network error";
-      console.error(err);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("GitHub error:", data);
+      return res.status(400).json({ error: data.message || 'GitHub API error' });
     }
-  };
-  reader.readAsDataURL(file);
+
+    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}`;
+
+    res.status(200).json({
+      success: true,
+      url: rawUrl,
+      path: path
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }
