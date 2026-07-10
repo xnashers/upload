@@ -1,52 +1,44 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+async function uploadImage() {
+  const file = fileInput.files[0];
+  if (!file) return alert("Select an image first");
 
-  const { filename, content, message } = req.body;
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-  const REPO_OWNER = 'YOUR_USERNAME';
-  const REPO_NAME = 'YOUR_REPO_NAME';
+  status.textContent = "Uploading...";
 
-  if (!GITHUB_TOKEN) {
-    return res.status(500).json({ error: 'Server configuration error' });
-  }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = reader.result.split(',')[1];
 
-  const path = `uploads/${Date.now()}-${filename}`;
-
-  try {
-    const response = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/vnd.github+json'
-        },
+    try {
+      const res = await fetch('https://YOUR-VERCEL-URL.vercel.app/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: message || `Upload ${filename}`,
-          content: content,
-          branch: 'main'
+          filename: file.name,
+          content: base64,
+          message: `Upload ${file.name}`
         })
+      });
+
+      console.log("Response status:", res.status);
+      const text = await res.text();
+      console.log("Raw response:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        data = { error: text };
       }
-    );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(400).json({ error: data.message || 'GitHub API error' });
+      if (res.ok) {
+        status.innerHTML = `✅ Success!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
+      } else {
+        status.textContent = `❌ ${data.error || res.status}`;
+      }
+    } catch (err) {
+      status.textContent = "❌ Network error";
+      console.error(err);
     }
-
-    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}`;
-
-    res.status(200).json({
-      success: true,
-      url: rawUrl,
-      path: path
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  };
+  reader.readAsDataURL(file);
 }
