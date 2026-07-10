@@ -1,10 +1,11 @@
+// api/upload.js
 export default async function handler(req, res) {
-  // CORS Headers - Set early
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // CORS Headers - Allow your frontend
+  res.setHeader('Access-Control-Allow-Origin', 'https://upload-omega-green.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight request
+  // Handle preflight (OPTIONS) request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -24,14 +25,15 @@ export default async function handler(req, res) {
   const REPO_NAME = 'upload';
 
   if (!GITHUB_TOKEN) {
-    return res.status(500).json({ error: 'Server configuration error (missing token)' });
+    return res.status(500).json({ error: 'Server is missing GITHUB_TOKEN' });
   }
 
+  // Sanitize filename
   const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
   const path = `uploads/${Date.now()}-${safeFilename}`;
 
   try {
-    const response = await fetch(
+    const githubResponse = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
       {
         method: 'PUT',
@@ -39,20 +41,23 @@ export default async function handler(req, res) {
           Authorization: `token ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
           Accept: 'application/vnd.github+json',
-          'User-Agent': 'Uploader'
+          'User-Agent': 'Pocket-Farm-Uploader'
         },
         body: JSON.stringify({
-          message: message || `Upload ${filename}`,
+          message: message || `Upload image: ${filename}`,
           content: content,
           branch: 'main'
         })
       }
     );
 
-    const data = await response.json();
+    const githubData = await githubResponse.json();
 
-    if (!response.ok) {
-      return res.status(400).json({ error: data.message || 'GitHub API error' });
+    if (!githubResponse.ok) {
+      console.error("GitHub API Error:", githubData);
+      return res.status(400).json({ 
+        error: githubData.message || 'Failed to upload to GitHub' 
+      });
     }
 
     const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}`;
@@ -63,7 +68,7 @@ export default async function handler(req, res) {
       path: path
     });
   } catch (error) {
-    console.error(error);
+    console.error("Server Error:", error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
