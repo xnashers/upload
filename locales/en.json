@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Pocket Farm",
+    "welcome": {
+      "title": "Welcome to",
+      "subtitle": "Pocket Farm",
+      "name_label": "Name your farm",
+      "name_placeholder": "My Farm",
+      "start": "🌾 Start Farming"
+    },
+    "tabs": {
+      "farm": "Farm",
+      "shop": "Shop",
+      "market": "Market",
+      "research": "Research",
+      "inventory": "Inventory",
+      "progress": "Progress"
+    },
+    "stats": {
+      "peso": "Peso",
+      "xp": "XP",
+      "level": "Level"
+    },
+    "farm": {
+      "empty": "Tap to Plant",
+      "growing": "Growing...",
+      "ready": "READY!",
+      "harvest": "Harvest",
+      "buy_plot": "Buy Plot",
+      "plots": "plots"
+    },
+    "shop": {
+      "seeds": "Seeds",
+      "gear": "Gear"
+    },
+    "market": {
+      "title": "Market",
+      "empty": "No crops to sell yet"
+    },
+    "research": {
+      "title": "Research",
+      "lab": "Research Lab",
+      "mutations": "Mutation Lab",
+      "weather": "Weather Center",
+      "genetics": "Seed Genetics",
+      "mastery": "Crop Mastery"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "empty": "Your inventory is empty"
+    },
+    "toast": {
+      "planted": "Planted {crop}!",
+      "harvested": "Harvested {crop}! +{xp} XP",
+      "sold": "Sold {quantity} {crop} for ₱{amount}!",
+      "level_up": "⭐ Level {level} – {title}!",
+      "double": "Double harvest! 🎉",
+      "farm_named": "Welcome to {name}! 🌱",
+      "plot_bought": "🔓 New plot unlocked!",
+      "harvested_crop": "Harvested {crop}!",
+      "weather_blocked": "🚫 Can't plant this crop in current weather!"
+    }
+  }
+}
