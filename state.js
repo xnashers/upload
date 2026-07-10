@@ -1,4 +1,6 @@
-  // === Persistence ===
+  // =============================================
+  // PERSISTENCE + CLOUD SYNC
+  // =============================================
   async save() {
     await saveGame({
       player: this.player,
@@ -32,27 +34,23 @@
       levelRewardsClaimed: this.levelRewardsClaimed,
       favorites: this.favorites,
     });
-// Cloud support
-window.cloudSave = null;
-    // === CLOUD SAVE ===
+
+    // Cloud sync
     if (window.cloudSave) {
       await window.cloudSave(this);
     }
 
     this.notify();
   }
-  async save() {
-    await saveGame({
-      // ... all your existing data fields ...
-      player: this.player,
-      plots: this.plots,
-      // ... etc (keep everything you already have)
-    });
 
-    // === ADD THIS LINE FOR CLOUD SAVE ===
-    if (window.cloudSave) {
-      await window.cloudSave(this);
-    }
-
-    this.notify();
+  subscribe(fn) {
+    this.listeners.push(fn);
+    return () => { this.listeners = this.listeners.filter(l => l !== fn); };
   }
+
+  notify() {
+    for (const fn of this.listeners) fn();
+  }
+}
+
+export const gameState = new GameState();
