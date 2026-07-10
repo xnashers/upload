@@ -1,9 +1,10 @@
 export default async function handler(req, res) {
-  // CORS
+  // CORS Headers - Set early
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+  // Handle preflight request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -23,7 +24,6 @@ export default async function handler(req, res) {
   const REPO_NAME = 'upload';
 
   if (!GITHUB_TOKEN) {
-    console.error("GITHUB_TOKEN is missing");
     return res.status(500).json({ error: 'Server configuration error (missing token)' });
   }
 
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
           Authorization: `token ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
           Accept: 'application/vnd.github+json',
-          'User-Agent': 'Pocket-Farm-Uploader'
+          'User-Agent': 'Uploader'
         },
         body: JSON.stringify({
           message: message || `Upload ${filename}`,
@@ -52,7 +52,6 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("GitHub error:", data);
       return res.status(400).json({ error: data.message || 'GitHub API error' });
     }
 
@@ -64,7 +63,7 @@ export default async function handler(req, res) {
       path: path
     });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
