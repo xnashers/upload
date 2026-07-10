@@ -1,63 +1,49 @@
-export default async function handler(req, res) {
-  // Allow your specific frontend
-  res.setHeader('Access-Control-Allow-Origin', 'https://upload-omega-green.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { filename, content, message } = req.body || {};
-
-  if (!filename || !content) {
-    return res.status(400).json({ error: 'Missing filename or content' });
-  }
-
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-  const REPO_OWNER = 'xnashers';
-  const REPO_NAME = 'upload';
-
-  if (!GITHUB_TOKEN) {
-    return res.status(500).json({ error: 'Server missing GitHub token' });
-  }
-
-  const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const path = `uploads/${Date.now()}-${safeFilename}`;
-
-  try {
-    const githubRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/vnd.github+json'
-        },
-        body: JSON.stringify({
-          message: message || `Upload ${filename}`,
-          content: content,
-          branch: 'main'
-        })
-      }
-    );
-
-    const githubData = await githubRes.json();
-
-    if (!githubRes.ok) {
-      return res.status(400).json({ error: githubData.message || 'GitHub error' });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pocket Farm - Image Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; }
+    h1 { color: #2c3e50; }
+    input[type="file"] { margin: 20px 0; }
+    button { 
+      background: #27ae60; color: white; padding: 12px 24px; 
+      font-size: 16px; border: none; border-radius: 6px; cursor: pointer; 
     }
+    button:hover { background: #219653; }
+    #preview { max-width: 100%; max-height: 300px; margin: 20px 0; border: 2px solid #ddd; border-radius: 8px; }
+    #status { margin-top: 20px; font-weight: bold; min-height: 60px; }
+  </style>
+</head>
+<body>
+  <h1>📸 Upload Image</h1>
+  <input type="file" id="fileInput" accept="image/*">
+  <br><br>
+  <button onclick="uploadImage()">Upload to GitHub</button>
+  <img id="preview" alt="Preview">
+  <p id="status"></p>
 
-    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}`;
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
 
-    res.status(200).json({ success: true, url: rawUrl });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        status.textContent = '';
+      }
+    });
+
+    async function uploadImage() {
+      const file = fileInput.files[0];
+      if (!file) return alert("Please select an image first!");
+
+      status.textContent = "Uploading...";
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader
