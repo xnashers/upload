@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pocket Farm - Upload Image</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #preview { max-width: 300px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Upload Image</h1>
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="uploadImage()">Upload to GitHub</button>
+  <img id="preview" alt="Preview">
+  <p id="status"></p>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+      }
+    });
+
+    async function uploadImage() {
+      const file = fileInput.files[0];
+      if (!file) return alert("Select an image first");
+
+      status.textContent = "Uploading...";
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1]; // remove data: prefix
+
+        try {
+          const res = await fetch('/api/upload', {  // Vercel function route
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              content: base64,
+              message: `Upload ${file.name}`
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            status.innerHTML = `✅ Uploaded!<br>
+              <a href="${data.url}" target="_blank">View Image</a>`;
+          } else {
+            status.textContent = `❌ Error: ${data.error}`;
+          }
+        } catch (err) {
+          status.textContent = "❌ Upload failed";
+          console.error(err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
