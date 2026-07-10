@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pocket Farm - Image Upload</title>
+  <title>Image Upload</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+    }
     h1 { color: #2c3e50; }
-    input[type="file"] { margin: 20px 0; }
     button { 
       background: #27ae60; color: white; padding: 12px 24px; 
       font-size: 16px; border: none; border-radius: 6px; cursor: pointer; 
@@ -18,10 +23,10 @@
   </style>
 </head>
 <body>
-  <h1>📸 Upload Image</h1>
+  <h1>📸 Upload Image to GitHub</h1>
   <input type="file" id="fileInput" accept="image/*">
   <br><br>
-  <button onclick="uploadImage()">Upload to GitHub</button>
+  <button onclick="uploadImage()">Upload Image</button>
   <img id="preview" alt="Preview">
   <p id="status"></p>
 
@@ -34,16 +39,54 @@
       const file = fileInput.files[0];
       if (file) {
         preview.src = URL.createObjectURL(file);
-        status.textContent = '';
       }
     });
 
     async function uploadImage() {
       const file = fileInput.files[0];
-      if (!file) return alert("Please select an image first!");
+      if (!file) {
+        alert("Please select an image first!");
+        return;
+      }
 
       status.textContent = "Uploading...";
 
       const reader = new FileReader();
       reader.onload = async () => {
-        const base64 = reader
+        const base64 = reader.result.split(',')[1];
+
+        try {
+          const res = await fetch('https://upload-xnashers.vercel.app/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              content: base64,
+              message: `Upload ${file.name}`
+            })
+          });
+
+          const text = await res.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            data = { error: text };
+          }
+
+          if (res.ok) {
+            status.innerHTML = `✅ Uploaded!<br><br>
+              <a href="${data.url}" target="_blank">${data.url}</a>`;
+          } else {
+            status.textContent = `❌ Error: ${data.error || res.status}`;
+          }
+        } catch (err) {
+          status.textContent = "❌ Failed to connect to server";
+          console.error(err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
