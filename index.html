@@ -5,25 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Upload</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; }
     h1 { color: #2c3e50; }
-    button { 
-      background: #27ae60; color: white; padding: 12px 24px; 
-      font-size: 16px; border: none; border-radius: 6px; cursor: pointer; 
-    }
+    button { background: #27ae60; color: white; padding: 12px 24px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; }
     button:hover { background: #219653; }
     #preview { max-width: 100%; max-height: 300px; margin: 20px 0; border: 2px solid #ddd; border-radius: 8px; }
     #status { margin-top: 20px; font-weight: bold; min-height: 60px; }
   </style>
 </head>
 <body>
-  <h1>📸 Upload Image to GitHub</h1>
+  <h1>📸 Upload Image</h1>
   <input type="file" id="fileInput" accept="image/*">
   <br><br>
   <button onclick="uploadImage()">Upload Image</button>
@@ -37,17 +28,12 @@
 
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-      }
+      if (file) preview.src = URL.createObjectURL(file);
     });
 
     async function uploadImage() {
       const file = fileInput.files[0];
-      if (!file) {
-        alert("Please select an image first!");
-        return;
-      }
+      if (!file) return alert("Select an image first");
 
       status.textContent = "Uploading...";
 
@@ -56,7 +42,7 @@
         const base64 = reader.result.split(',')[1];
 
         try {
-          const res = await fetch('https://upload-xnashers.vercel.app/api/upload', {
+          const res = await fetch('/api/upload', {  // Relative path - no CORS issue
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -68,20 +54,15 @@
 
           const text = await res.text();
           let data;
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            data = { error: text };
-          }
+          try { data = JSON.parse(text); } catch(e) { data = { error: text }; }
 
           if (res.ok) {
-            status.innerHTML = `✅ Uploaded!<br><br>
-              <a href="${data.url}" target="_blank">${data.url}</a>`;
+            status.innerHTML = `✅ Success!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
           } else {
-            status.textContent = `❌ Error: ${data.error || res.status}`;
+            status.textContent = `❌ ${data.error || res.status}`;
           }
         } catch (err) {
-          status.textContent = "❌ Failed to connect to server";
+          status.textContent = "❌ Connection failed";
           console.error(err);
         }
       };
