@@ -1,11 +1,10 @@
 // api/upload.js
 export default async function handler(req, res) {
-  // CORS Headers - Allow your frontend
+  // CORS - Allow your frontend
   res.setHeader('Access-Control-Allow-Origin', 'https://upload-omega-green.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight (OPTIONS) request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -25,50 +24,44 @@ export default async function handler(req, res) {
   const REPO_NAME = 'upload';
 
   if (!GITHUB_TOKEN) {
-    return res.status(500).json({ error: 'Server is missing GITHUB_TOKEN' });
+    return res.status(500).json({ error: 'Missing GITHUB_TOKEN environment variable' });
   }
 
-  // Sanitize filename
   const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
   const path = `uploads/${Date.now()}-${safeFilename}`;
 
   try {
-    const githubResponse = await fetch(
+    const githubRes = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
       {
         method: 'PUT',
         headers: {
           Authorization: `token ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
-          Accept: 'application/vnd.github+json',
-          'User-Agent': 'Pocket-Farm-Uploader'
+          Accept: 'application/vnd.github+json'
         },
         body: JSON.stringify({
-          message: message || `Upload image: ${filename}`,
+          message: message || `Upload ${filename}`,
           content: content,
           branch: 'main'
         })
       }
     );
 
-    const githubData = await githubResponse.json();
+    const githubData = await githubRes.json();
 
-    if (!githubResponse.ok) {
-      console.error("GitHub API Error:", githubData);
-      return res.status(400).json({ 
-        error: githubData.message || 'Failed to upload to GitHub' 
-      });
+    if (!githubRes.ok) {
+      return res.status(400).json({ error: githubData.message || 'GitHub upload failed' });
     }
 
     const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}`;
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      url: rawUrl,
-      path: path
+      url: rawUrl
     });
   } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
   }
 }
