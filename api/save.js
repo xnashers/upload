@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -6,11 +8,11 @@ export default async function handler(req, res) {
   const { username, gameData } = req.body;
   if (!username || !gameData) return res.status(400).json({ error: 'Missing data' });
 
-  try {
-    await kv.set(`pocketfarm:${username}`, gameData, { ex: 2592000 });
-    res.status(200).json({ success: true });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Save failed' });
-  }
+  const { error } = await supabase
+    .from('pocketfarm_saves')
+    .update({ game_data: gameData, updated_at: new Date().toISOString() })
+    .eq('username', username.toLowerCase().trim());
+
+  if (error) return res.status(500).json({ error: 'Save failed' });
+  res.json({ success: true });
 }

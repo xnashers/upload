@@ -1,36 +1,35 @@
 const STORAGE_KEY = 'pocketfarm_save';
 
-export async function loadGame(username = null) {
-  try {
-    if (username) {
-      const res = await fetch(`/api/load?username=${encodeURIComponent(username)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data) return data;
-      }
-    }
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.warn('Cloud load failed');
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }
+function getStorage() {
+  return window.miniappsAI?.storage;
 }
 
-export async function saveGame(state, username = null) {
+export async function loadGame() {
   try {
-    const json = JSON.stringify(state);
-    localStorage.setItem(STORAGE_KEY, json);
-
-    if (username) {
-      await fetch('/api/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, gameData: state })
-      });
+    const storage = getStorage();
+    if (storage) {
+      const raw = await storage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } else {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
     }
   } catch (e) {
-    console.warn('Cloud save failed');
+    console.warn('Failed to load save:', e);
+  }
+  return null;
+}
+
+export async function saveGame(state) {
+  try {
+    const storage = getStorage();
+    const json = JSON.stringify(state);
+    if (storage) {
+      await storage.setItem(STORAGE_KEY, json);
+    } else {
+      localStorage.setItem(STORAGE_KEY, json);
+    }
+  } catch (e) {
+    console.warn('Failed to save game:', e);
   }
 }

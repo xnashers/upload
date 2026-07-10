@@ -15,6 +15,12 @@ export function createObjectivesView() {
   let activeTab = 'objectives';
   let expandedLevel = null;
 
+  // Hidden cheat: persistent tap trackers for Titles & Objectives sub-tabs
+  let titlesTapTimes = [];
+  let objectivesTapTimes = [];
+  const TAP_WINDOW = 2000; // 2 seconds window
+  const TAP_COUNT = 5;
+
   function render() {
     el.innerHTML = '';
 
@@ -27,7 +33,6 @@ export function createObjectivesView() {
       { id: 'achievements', label: '🏆 Achievements' },
       { id: 'tokens', label: '🪙 Token Shop' },
       { id: 'titles', label: '👑 Titles' },
-      { id: 'admin', label: '⚙️ Admin' },
     ];
     for (const tab of tabs) {
       const btn = document.createElement('button');
@@ -51,12 +56,45 @@ export function createObjectivesView() {
     }
     el.appendChild(tabRow);
 
+    // Hidden cheat: track rapid taps on Titles & Objectives sub-tabs
+    const tabBtns = tabRow.querySelectorAll('button');
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const label = btn.textContent || '';
+        const now = Date.now();
+        if (label.includes('Titles')) {
+          titlesTapTimes.push(now);
+          titlesTapTimes = titlesTapTimes.filter(t => now - t < TAP_WINDOW);
+          if (titlesTapTimes.length >= TAP_COUNT) {
+            titlesTapTimes = [];
+            const result = gameState.applyCheatCode('hesoyam');
+            if (result.success) {
+              playSound('levelup');
+              showToast(result.message, 'gold');
+              render();
+            }
+          }
+        } else if (label.includes('Objectives')) {
+          objectivesTapTimes.push(now);
+          objectivesTapTimes = objectivesTapTimes.filter(t => now - t < TAP_WINDOW);
+          if (objectivesTapTimes.length >= TAP_COUNT) {
+            objectivesTapTimes = [];
+            const result = gameState.applyCheatCode('growall');
+            if (result.success) {
+              playSound('levelup');
+              showToast(result.message, 'gold');
+              render();
+            }
+          }
+        }
+      });
+    });
+
     if (activeTab === 'objectives') renderObjectives(el);
     else if (activeTab === 'levels') renderLevels(el);
     else if (activeTab === 'achievements') renderAchievements(el);
     else if (activeTab === 'tokens') renderTokenShop(el);
     else if (activeTab === 'titles') renderTitles(el);
-    else if (activeTab === 'admin') renderAdmin(el);
   }
 
   // =============================================
@@ -321,6 +359,51 @@ export function createObjectivesView() {
       chestCard.appendChild(btn);
     }
     container.appendChild(chestCard);
+
+    // Reset Data section
+    const resetSection = document.createElement('div');
+    resetSection.className = 'mt-6 pt-4 border-t border-slate-800';
+    resetSection.innerHTML = `
+      <p class="text-xs text-slate-600 mb-2 text-center">Danger Zone</p>
+    `;
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'w-full py-2.5 rounded-xl bg-red-900/30 border border-red-800/40 hover:bg-red-900/50 text-red-400 text-sm font-bold transition-all active:scale-95';
+    resetBtn.textContent = '⚠️ Reset All Data';
+    resetBtn.onclick = () => {
+      // Confirmation step
+      resetBtn.textContent = '⚠️ Tap again to confirm reset';
+      resetBtn.className = 'w-full py-2.5 rounded-xl bg-red-800/50 border border-red-600/50 hover:bg-red-800/70 text-red-300 text-sm font-bold transition-all active:scale-95 animate-pulse';
+      let confirmed = false;
+      resetBtn.onclick = () => {
+        if (confirmed) return;
+        confirmed = true;
+        playSound('buy');
+        const doReload = () => {
+          showToast('🔄 All data reset! Reloading...', 'info');
+          setTimeout(() => location.reload(), 1000);
+        };
+        const storage = window.miniappsAI?.storage;
+        if (storage) {
+          storage.removeItem('pocketfarm_save').then(doReload).catch(() => {
+            showToast('❌ Reset failed', 'error');
+          });
+        } else {
+          localStorage.clear();
+          doReload();
+        }
+      };
+      // Auto-cancel after 3 seconds
+      setTimeout(() => {
+        if (!confirmed) {
+          resetBtn.textContent = '⚠️ Reset All Data';
+          resetBtn.className = 'w-full py-2.5 rounded-xl bg-red-900/30 border border-red-800/40 hover:bg-red-900/50 text-red-400 text-sm font-bold transition-all active:scale-95';
+          resetBtn.onclick = null;
+          render();
+        }
+      }, 3000);
+    };
+    resetSection.appendChild(resetBtn);
+    container.appendChild(resetSection);
   }
 
   function renderAchievements(container) {
@@ -424,11 +507,15 @@ export function createObjectivesView() {
 
       const btn = document.createElement('button');
       btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${
-        canBuy ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+        canBuy ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
       }`;
       btn.textContent = `🪙 ${item.cost}`;
-      btn.disabled = !canBuy;
       btn.onclick = () => {
+        if (!canBuy) {
+          playSound('buzzer');
+          showToast('Not enough Tokens!', 'error');
+          return;
+        }
         const res = gameState.buyTokenShopItem(item);
         if (res.success) {
           playSound('buy');
@@ -492,126 +579,6 @@ export function createObjectivesView() {
 
       container.appendChild(card);
     }
-  }
-
-  // =============================================
-  // ADMIN PANEL
-  // =============================================
-  function renderAdmin(container) {
-    const header = document.createElement('div');
-    header.className = 'flex items-center justify-between mb-3';
-    header.innerHTML = `
-      <h2 class="text-sm font-bold text-slate-200">⚙️ Admin Panel</h2>
-      <span class="text-xs text-slate-500">Testing tools</span>
-    `;
-    container.appendChild(header);
-
-    // Cheat Code Section
-    const cheatSection = document.createElement('div');
-    cheatSection.className = 'rounded-xl p-4 border bg-slate-900 border-slate-700 mb-4';
-
-    const cheatTitle = document.createElement('div');
-    cheatTitle.className = 'flex items-center gap-2 mb-3';
-    cheatTitle.innerHTML = `
-      <span class="text-lg">🎮</span>
-      <div>
-        <p class="text-sm font-bold text-slate-200">Cheat Codes</p>
-        <p class="text-xs text-slate-500">Enter a code to test features</p>
-      </div>
-    `;
-    cheatSection.appendChild(cheatTitle);
-
-    // Cheat code input row
-    const inputRow = document.createElement('div');
-    inputRow.className = 'flex gap-2';
-
-    const cheatInput = document.createElement('input');
-    cheatInput.type = 'text';
-    cheatInput.placeholder = 'Enter cheat code...';
-    cheatInput.className = 'flex-1 px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all';
-    cheatInput.setAttribute('aria-label', 'Cheat code input');
-    inputRow.appendChild(cheatInput);
-
-    const cheatBtn = document.createElement('button');
-    cheatBtn.className = 'px-4 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold transition-all active:scale-95 flex-shrink-0';
-    cheatBtn.textContent = '▶ Apply';
-    cheatBtn.onclick = () => {
-      const code = cheatInput.value.trim();
-      if (!code) return;
-      const result = gameState.applyCheatCode(code);
-      if (result.success) {
-        playSound('levelup');
-        showToast(result.message, 'gold');
-        cheatInput.value = '';
-        render();
-      } else {
-        playSound('error');
-        showToast(result.message, 'error');
-      }
-    };
-    inputRow.appendChild(cheatBtn);
-    cheatSection.appendChild(inputRow);
-
-    // Available codes hint
-    const hints = document.createElement('div');
-    hints.className = 'mt-3 space-y-1';
-    hints.innerHTML = `
-      <div class="flex items-center gap-2 text-xs">
-        <span class="text-purple-400 font-mono bg-purple-900/30 px-1.5 py-0.5 rounded">hesoyam</span>
-        <span class="text-slate-500">₱9,999,999 + 9,999,999 XP</span>
-      </div>
-      <div class="flex items-center gap-2 text-xs">
-        <span class="text-purple-400 font-mono bg-purple-900/30 px-1.5 py-0.5 rounded">growall</span>
-        <span class="text-slate-500">Instantly grow all planted crops</span>
-      </div>
-    `;
-    cheatSection.appendChild(hints);
-    container.appendChild(cheatSection);
-
-    // Reset Data Section
-    const resetSection = document.createElement('div');
-    resetSection.className = 'rounded-xl p-4 border-2 border-red-500/30 bg-red-900/10';
-
-    const resetTitle = document.createElement('div');
-    resetTitle.className = 'flex items-center gap-2 mb-2';
-    resetTitle.innerHTML = `
-      <span class="text-lg">⚠️</span>
-      <div>
-        <p class="text-sm font-bold text-red-300">Reset All Data</p>
-        <p class="text-xs text-slate-500">Deletes all save data and restarts the game</p>
-      </div>
-    `;
-    resetSection.appendChild(resetTitle);
-
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'w-full py-3 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-all active:scale-95 mt-2';
-    resetBtn.textContent = '🗑️ Reset All Data';
-    resetBtn.onclick = async () => {
-      if (confirm('⚠️ Are you sure? This will delete ALL your progress, crops, coins, and achievements. This cannot be undone!')) {
-        if (confirm('Last chance! Type will not be asked. Click OK to permanently delete everything.')) {
-          showToast('🔄 Resetting data...', 'info');
-          await gameState.resetAllData();
-        }
-      }
-    };
-    resetSection.appendChild(resetBtn);
-    container.appendChild(resetSection);
-
-    // Current stats summary
-    const statsCard = document.createElement('div');
-    statsCard.className = 'rounded-xl p-3 border bg-slate-900 border-slate-800 mt-4';
-    statsCard.innerHTML = `
-      <p class="text-xs font-bold text-slate-400 mb-2">📊 Current Save Data</p>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Level</span><br><span class="text-white font-bold">${gameState.player.level}</span></div>
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Peso</span><br><span class="text-amber-300 font-bold">₱${gameState.player.peso.toLocaleString()}</span></div>
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Plots</span><br><span class="text-white font-bold">${gameState.plots.length}</span></div>
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Tokens</span><br><span class="text-purple-300 font-bold">🪙${gameState.farmerTokens}</span></div>
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Harvests</span><br><span class="text-white font-bold">${gameState.stats.totalHarvests.toLocaleString()}</span></div>
-        <div class="p-2 rounded bg-slate-800/50"><span class="text-slate-500">Mutations</span><br><span class="text-purple-300 font-bold">${gameState.stats.totalMutations.toLocaleString()}</span></div>
-      </div>
-    `;
-    container.appendChild(statsCard);
   }
 
   render();

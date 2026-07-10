@@ -9,12 +9,17 @@ const t = (key, values) => window.miniappI18n?.t(key, values) ?? key;
 
 let timerInterval = null;
 let weatherInterval = null;
+let lastRenderedWeatherId = null;
 
 function renderWeatherEffects() {
   const weatherFx = document.getElementById('weather-effects');
   if (!weatherFx) return;
   const w = gameState.currentWeather;
-  if (!w) { weatherFx.innerHTML = ''; return; }
+  if (!w) { weatherFx.innerHTML = ''; lastRenderedWeatherId = null; return; }
+
+  // Skip re-render if same weather — particles persist smoothly
+  if (lastRenderedWeatherId === w.id) return;
+  lastRenderedWeatherId = w.id;
 
   let particles = '';
   const count = 40;
@@ -174,7 +179,8 @@ function createSeedPopup() {
 
 function createSprinklerBar() {
   const bar = document.createElement('div');
-  bar.className = 'flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border bg-slate-800/40 border-white/5';
+  bar.className = 'flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border transition-all duration-300';
+  bar.id = 'sprinkler-bar';
 
   function render() {
     const active = gameState.getActiveSprinkler();
@@ -182,11 +188,12 @@ function createSprinklerBar() {
     if (!active) {
       const invCount = gameState.gear.sprinklerInventory.length;
       const invText = invCount > 0
-        ? ` · 💦 <strong class="text-blue-400">${invCount} in inventory</strong> — tap Inventory to use`
-        : ' · Buy one in <strong class="text-blue-400">Gear</strong> shop';
+        ? ` · 💦 <strong class="text-blue-400">${invCount} ready</strong> — Inventory ▶ Use`
+        : ' · Buy in <strong class="text-blue-400">Gear</strong> shop';
+      bar.className = 'flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border transition-all duration-300 bg-slate-800/40 border-white/5';
       bar.innerHTML = `
         <span class="text-base opacity-50">💧</span>
-        <span class="text-xs text-slate-500">No active sprinkler${invText}</span>
+        <span class="text-xs text-slate-500">No sprinkler${invText}</span>
       `;
     } else {
       const sp = SPRINKLERS.find(s => s.tier === active.tier);
@@ -194,15 +201,15 @@ function createSprinklerBar() {
       const bonusPct = Math.round(sp.speedBonus * 100);
       const doubleStr = sp.doubleHarvestBonus ? ` · +${Math.round(sp.doubleHarvestBonus * 100)}% double` : '';
       const remaining = gameState.getActiveSprinklerTimeRemaining();
+      bar.className = 'flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border transition-all duration-300 bg-blue-900/30 border-blue-500/40';
       bar.innerHTML = `
         <span class="text-base flex-shrink-0">${sp.emoji}</span>
         <div class="flex-1 min-w-0">
-          <span class="text-xs font-semibold text-blue-300">${sp.name}</span>
-          <span class="text-xs text-slate-400"> · +${bonusPct}% speed${doubleStr}</span>
+          <span class="text-xs font-semibold text-blue-300">${sp.name} Active</span>
+          <span class="text-xs text-green-400"> · ⚡+${bonusPct}% speed${doubleStr}</span>
         </div>
         <div class="text-right flex-shrink-0">
-          <div class="text-xs text-green-400 font-bold">Active</div>
-          <div class="text-[10px] text-slate-400 sprinkler-countdown">${formatMs(remaining)}</div>
+          <div class="text-xs text-green-400 font-bold sprinkler-countdown">${formatMs(remaining)}</div>
         </div>
       `;
     }
@@ -249,6 +256,8 @@ export function createFarmView() {
     const card = document.createElement('div');
     card.className = 'relative rounded-2xl border-2 transition-all duration-200 overflow-hidden';
     card.dataset.plotIndex = index;
+
+    const isFav = gameState.isFavorite(index);
 
     if (plot.status === 'empty') {
       card.className += ' border-dashed border-slate-600 bg-slate-800/50 hover:border-green-500/50 hover:bg-slate-800 cursor-pointer active:scale-95';
@@ -308,19 +317,23 @@ export function createFarmView() {
             <span class="text-3xl">${crop.emoji}</span>
             ${mutationBadges}
             <span class="text-xs font-bold text-green-300 animate-pulse">${t('app.farm.ready')}</span>
-            <div class="flex gap-1 mt-2">
-              <button class="px-3 py-1.5 bg-green-500 hover:bg-green-400 text-slate-900 rounded-xl text-xs font-bold transition harvest-btn active:scale-95">✨ ${t('app.farm.harvest')}</button>
-            </div>
+
           </div>
         `;
-        card.querySelector('.harvest-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
+        card.addEventListener('click', () => {
+          if (gameState.isFavorite(index)) {
+            showToast('❤️ This plot is favorited! Unfavorite it first to harvest.', 'warning');
+            playSound('click');
+            return;
+          }
           handleHarvest(index);
         });
-        card.addEventListener('click', () => handleHarvest(index));
       } else {
         const canFertilize = !plot.fertilized && gameState.gear.fertilizerCount > 0;
-        card.className += ' border-slate-600/40 bg-slate-800/30';
+        const activeSp = gameState.getActiveSprinkler();
+        const spData = activeSp ? SPRINKLERS.find(s => s.tier === activeSp.tier) : null;
+        const spBonusPct = spData ? Math.round(spData.speedBonus * 100) : 0;
+        card.className += activeSp ? ' border-blue-500/30 bg-blue-900/10' : ' border-slate-600/40 bg-slate-800/30';
 
         let actionBtns = '';
         if (canFertilize) {
@@ -328,6 +341,10 @@ export function createFarmView() {
         } else if (plot.fertilized) {
           actionBtns += '<span class="mt-1 text-xs text-amber-400/60">💩 Fertilized</span>';
         }
+
+        const sprinklerBadge = activeSp
+          ? `<span class="text-[10px] text-blue-400 font-bold">⚡+${spBonusPct}% speed</span>`
+          : '';
 
         const pct = Math.round(progress * 100);
         card.innerHTML = `
@@ -340,6 +357,7 @@ export function createFarmView() {
               </div>
             </div>
             ${plot.fertilized ? '<span class="text-xs text-amber-400">💩 +weight</span>' : ''}
+            ${sprinklerBadge}
             <div class="flex gap-1">${actionBtns}</div>
           </div>
         `;
@@ -356,16 +374,33 @@ export function createFarmView() {
       }
     }
 
+    // ❤️ Favorite toggle — top-right corner, always visible on non-empty plots
+    if (plot.status !== 'empty') {
+      const favBtn = document.createElement('button');
+      favBtn.type = 'button';
+      favBtn.className = 'absolute top-1.5 right-1.5 z-20 w-7 h-7 flex items-center justify-center rounded-full transition-all duration-150 active:scale-90';
+      favBtn.style.cssText = isFav
+        ? 'background: rgba(236, 72, 153, 0.3); border: 1px solid rgba(236, 72, 153, 0.5);'
+        : 'background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1);';
+      favBtn.innerHTML = `<span class="text-sm leading-none" style="filter: ${isFav ? 'none' : 'grayscale(1) opacity(0.4)'}">${isFav ? '❤️' : '🤍'}</span>`;
+      favBtn.setAttribute('aria-label', isFav ? 'Unfavorite plot' : 'Favorite plot');
+      favBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nowFav = gameState.toggleFavorite(index);
+        playSound('click');
+        showToast(nowFav ? '❤️ Plot favorited! Protected from accidental harvest.' : '🤍 Plot unfavorited.', 'info');
+        render();
+      });
+      card.appendChild(favBtn);
+    }
+
     return card;
   }
 
   function renderBuyPlotTile() {
     const card = document.createElement('div');
     const plotPrice = gameState.getPlotPrice();
-    const canAfford = gameState.player.peso >= plotPrice;
-    card.className = `relative rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-200 ${
-      canAfford ? 'border-amber-500/50 bg-amber-900/20 hover:border-amber-400 hover:bg-amber-900/30 cursor-pointer active:scale-95' : 'border-slate-700 bg-slate-800/30 opacity-50'
-    }`;
+    card.className = 'relative rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-200 border-amber-500/50 bg-amber-900/20 hover:border-amber-400 hover:bg-amber-900/30 cursor-pointer active:scale-95';
     card.innerHTML = `
       <div class="flex flex-col items-center justify-center py-8 px-4 gap-1">
         <span class="text-2xl">🔓</span>
@@ -373,14 +408,17 @@ export function createFarmView() {
         <span class="text-xs text-yellow-400">₱${plotPrice.toLocaleString()}</span>
       </div>
     `;
-    if (canAfford) {
-      card.addEventListener('click', () => {
-        if (gameState.buyPlot()) {
-          playSound('buy');
-          showToast(t('app.toast.plot_bought'), 'success');
-        }
-      });
-    }
+    card.addEventListener('click', () => {
+      if (gameState.player.peso < plotPrice) {
+        playSound('buzzer');
+        showToast(t('app.toast.not_enough_peso'), 'error');
+        return;
+      }
+      if (gameState.buyPlot()) {
+        playSound('buy');
+        showToast(t('app.toast.plot_bought'), 'success');
+      }
+    });
     return card;
   }
 

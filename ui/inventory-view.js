@@ -114,7 +114,9 @@ export function createInventoryView() {
           card.querySelector('.use-sprinkler-btn').addEventListener('click', () => {
             if (gameState.useSprinkler(index)) {
               playSound('buy');
-              showToast(`${sp.emoji} ${sp.name} activated! ${formatMs(sp.duration)}`, 'success');
+              const bonusPct = Math.round(sp.speedBonus * 100);
+              const doubleStr = sp.doubleHarvestBonus ? ` · +${Math.round(sp.doubleHarvestBonus * 100)}% double harvest` : '';
+              showToast(`${sp.emoji} ${sp.name} active! ⚡+${bonusPct}% speed${doubleStr} for ${formatMs(sp.duration)}`, 'success');
             }
           });
         }

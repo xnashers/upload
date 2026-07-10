@@ -81,6 +81,11 @@ export function playSound(type) {
         tone(1100, 0.08, 'sine', 0.05, 0.05);
         tone(1320, 0.15, 'sine', 0.07, 0.10);
         break;
+      case 'buzzer':
+        tone(180, 0.25, 'sawtooth', 0.08);
+        tone(140, 0.30, 'sawtooth', 0.06, 0.12);
+        tone(100, 0.20, 'square', 0.04, 0.25);
+        break;
     }
   } catch (_) { /* silent */ }
 }

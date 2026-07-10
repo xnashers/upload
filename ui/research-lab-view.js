@@ -39,14 +39,12 @@ export function renderResearchLab(container) {
     const level = gameState.getResearchLevel(upgrade.id);
     const isMax = level >= upgrade.maxLevel;
     const nextCost = isMax ? 0 : getResearchCost(level + 1);
-    const canAfford = !isMax && gameState.player.peso >= nextCost;
     const effect = gameState.getResearchEffect(upgrade.id);
 
     const card = document.createElement('div');
     card.className = `flex items-center gap-3 p-3 rounded-xl border transition ${
       isMax ? 'bg-green-900/20 border-green-500/30' :
-      canAfford ? 'bg-slate-800/60 border-white/10 hover:border-white/20' :
-      'bg-slate-900/40 border-white/5'
+      'bg-slate-800/60 border-white/10 hover:border-white/20'
     }`;
 
     card.innerHTML = `
@@ -61,14 +59,18 @@ export function renderResearchLab(container) {
       </div>
       <div class="flex-shrink-0">
         ${isMax ? '<span class="text-xs text-green-400 font-bold">✅ MAX</span>' :
-          canAfford ? `<button class="research-buy px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>` :
-          `<span class="text-xs text-slate-500">₱${nextCost.toLocaleString()}</span>`
+          `<button class="research-buy px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>`
         }
       </div>
     `;
 
-    if (canAfford) {
+    if (!isMax) {
       card.querySelector('.research-buy').addEventListener('click', () => {
+        if (gameState.player.peso < nextCost) {
+          playSound('buzzer');
+          showToast(t('app.toast.not_enough_peso'), 'error');
+          return;
+        }
         const result = gameState.buyResearch(upgrade.id, upgrade);
         if (result.success) {
           playSound('buy');

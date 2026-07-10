@@ -4,6 +4,8 @@ import { GENETICS_TIERS, getGeneticsCost } from '../data/research.js';
 import { showToast } from './toast.js';
 import { playSound } from './sounds.js';
 
+const t = (key, values) => window.miniappI18n?.t(key, values) ?? key;
+
 export function renderGenetics(container) {
   container.innerHTML = '';
 
@@ -37,7 +39,6 @@ export function renderGenetics(container) {
       const tier = gameState.getCropGeneticsTier(crop.id);
       const isMax = tier >= GENETICS_TIERS.length;
       const nextCost = isMax ? 0 : getGeneticsCost(crop, tier);
-      const canAfford = !isMax && gameState.player.peso >= nextCost;
       const tierName = tier > 0 ? GENETICS_TIERS[tier - 1].name : 'Normal';
       const tierEmoji = tier > 0 ? GENETICS_TIERS[tier - 1].emoji : '';
       const priceMult = tier > 0 ? GENETICS_TIERS[tier - 1].priceMultiplier : 1;
@@ -46,8 +47,7 @@ export function renderGenetics(container) {
       const card = document.createElement('div');
       card.className = `flex items-center gap-3 p-3 rounded-xl border transition ${
         isMax ? 'bg-green-900/20 border-green-500/30' :
-        canAfford ? 'bg-slate-800/60 border-white/10 hover:border-white/20' :
-        'bg-slate-900/40 border-white/5'
+        'bg-slate-800/60 border-white/10 hover:border-white/20'
       }`;
 
       const progressBar = Array.from({ length: GENETICS_TIERS.length }, (_, i) =>
@@ -67,14 +67,18 @@ export function renderGenetics(container) {
         </div>
         <div class="flex-shrink-0">
           ${isMax ? '<span class="text-xs text-green-400 font-bold">✅ MAX</span>' :
-            canAfford ? `<button class="genetics-buy px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>` :
-            `<span class="text-xs text-slate-500">₱${nextCost.toLocaleString()}</span>`
+            `<button class="genetics-buy px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>`
           }
         </div>
       `;
 
-      if (canAfford) {
+      if (!isMax) {
         card.querySelector('.genetics-buy').addEventListener('click', () => {
+          if (gameState.player.peso < nextCost) {
+            playSound('buzzer');
+            showToast(t('app.toast.not_enough_peso'), 'error');
+            return;
+          }
           const result = gameState.upgradeCropGenetics(crop.id);
           if (result.success) {
             playSound('buy');

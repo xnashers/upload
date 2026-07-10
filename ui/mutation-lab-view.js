@@ -3,6 +3,8 @@ import { MUTATION_LAB, getMutationLabCost } from '../data/research.js';
 import { showToast } from './toast.js';
 import { playSound } from './sounds.js';
 
+const t = (key, values) => window.miniappI18n?.t(key, values) ?? key;
+
 export function renderMutationLab(container) {
   container.innerHTML = '';
 
@@ -30,7 +32,6 @@ export function renderMutationLab(container) {
     const level = gameState.getMutationLabLevel(upgrade.id);
     const isMax = level >= upgrade.maxLevel;
     const nextCost = isMax ? 0 : getMutationLabCost(level + 1);
-    const canAfford = !isMax && gameState.player.peso >= nextCost;
     const effect = gameState.getMutationLabEffect(upgrade.id);
 
     let effectText = '';
@@ -41,8 +42,7 @@ export function renderMutationLab(container) {
     const card = document.createElement('div');
     card.className = `flex items-center gap-3 p-3 rounded-xl border transition ${
       isMax ? 'bg-green-900/20 border-green-500/30' :
-      canAfford ? 'bg-slate-800/60 border-white/10 hover:border-white/20' :
-      'bg-slate-900/40 border-white/5'
+      'bg-slate-800/60 border-white/10 hover:border-white/20'
     }`;
 
     card.innerHTML = `
@@ -57,14 +57,18 @@ export function renderMutationLab(container) {
       </div>
       <div class="flex-shrink-0">
         ${isMax ? '<span class="text-xs text-green-400 font-bold">✅ MAX</span>' :
-          canAfford ? `<button class="lab-buy px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>` :
-          `<span class="text-xs text-slate-500">₱${nextCost.toLocaleString()}</span>`
+          `<button class="lab-buy px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>`
         }
       </div>
     `;
 
-    if (canAfford) {
+    if (!isMax) {
       card.querySelector('.lab-buy').addEventListener('click', () => {
+        if (gameState.player.peso < nextCost) {
+          playSound('buzzer');
+          showToast(t('app.toast.not_enough_peso'), 'error');
+          return;
+        }
         const result = gameState.buyMutationLab(upgrade.id, upgrade);
         if (result.success) {
           playSound('buy');

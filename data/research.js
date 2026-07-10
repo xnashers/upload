@@ -35,7 +35,7 @@ export function getMutationLabCost(level) {
 // Weather Center — Spend peso to manipulate weather
 // ===========================================
 export const WEATHER_CENTER = {
-  forecast: { name: 'Forecast', emoji: '📡', cost: 5000, desc: 'See the next weather event' },
+  forecast: { name: 'Forecast', emoji: '📡', costs: { 1: 5000, 2: 25000, 3: 100000 }, desc: 'See future weather events', maxLevel: 3 },
   skip: { name: 'Skip Weather', emoji: '⏭️', cost: 25000, desc: 'Change weather right now' },
   rareBoost: { name: 'Rare Weather Boost', emoji: '🌟', cost: 100000, desc: '+rare weather chance for 10 min', duration: 600000 },
 };

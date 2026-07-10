@@ -1,6 +1,18 @@
-const UPDATE_VERSION = 'v2.0';
+const UPDATE_VERSION = 'v2.1';
 
 const UPDATE_ITEMS = [
+  {
+    emoji: '❤️',
+    title: 'Favorite Your Plots',
+    desc: 'Tap the heart on any plot to protect it from accidental harvesting! Favorited plots are locked until you unfavorite them. No more losing your best mutated crops.',
+    bg: 'from-pink-900/40 to-rose-900/20',
+  },
+  {
+    emoji: '👆',
+    title: 'Tap to Harvest',
+    desc: 'Ready crops are now harvested with a simple tap — no more buttons! Just tap a glowing plot to harvest it instantly. Faster, cleaner, more satisfying.',
+    bg: 'from-green-900/40 to-emerald-900/20',
+  },
   {
     emoji: '🌧️',
     title: 'Weather Visual Effects',

@@ -4,6 +4,8 @@ import { MASTERY_CONFIG, getMasteryCost } from '../data/research.js';
 import { showToast } from './toast.js';
 import { playSound } from './sounds.js';
 
+const t = (key, values) => window.miniappI18n?.t(key, values) ?? key;
+
 export function renderMastery(container) {
   container.innerHTML = '';
 
@@ -38,7 +40,6 @@ export function renderMastery(container) {
       const level = gameState.getCropMasteryLevel(crop.id);
       const isMax = level >= MASTERY_CONFIG.maxLevel;
       const nextCost = isMax ? 0 : getMasteryCost(crop, level + 1);
-      const canAfford = !isMax && gameState.player.peso >= nextCost;
       const bonus = gameState.getCropMasteryBonus(crop.id);
 
       const pct = Math.round((level / MASTERY_CONFIG.maxLevel) * 100);
@@ -46,8 +47,7 @@ export function renderMastery(container) {
       const card = document.createElement('div');
       card.className = `flex items-center gap-3 p-3 rounded-xl border transition ${
         isMax ? 'bg-green-900/20 border-green-500/30' :
-        canAfford ? 'bg-slate-800/60 border-white/10 hover:border-white/20' :
-        'bg-slate-900/40 border-white/5'
+        'bg-slate-800/60 border-white/10 hover:border-white/20'
       }`;
 
       card.innerHTML = `
@@ -64,14 +64,18 @@ export function renderMastery(container) {
         </div>
         <div class="flex-shrink-0">
           ${isMax ? '<span class="text-xs text-green-400 font-bold">✅ MAX</span>' :
-            canAfford ? `<button class="mastery-buy px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>` :
-            `<span class="text-xs text-slate-500">₱${nextCost.toLocaleString()}</span>`
+            `<button class="mastery-buy px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition active:scale-95">₱${nextCost.toLocaleString()}</button>`
           }
         </div>
       `;
 
-      if (canAfford) {
+      if (!isMax) {
         card.querySelector('.mastery-buy').addEventListener('click', () => {
+          if (gameState.player.peso < nextCost) {
+            playSound('buzzer');
+            showToast(t('app.toast.not_enough_peso'), 'error');
+            return;
+          }
           const result = gameState.upgradeCropMastery(crop.id);
           if (result.success) {
             playSound('buy');
