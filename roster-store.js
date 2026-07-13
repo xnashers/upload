@@ -12,6 +12,9 @@ export const ROSTER_RESET_KEY = 'hudASRosterReset';
 export const POSTS_KEY = 'hudASPhotoPosts';
 const PORTRAITS_KEY = 'hudASPortraits';
 const storage = () => window.miniappsAI?.storage;
+const LEGACY_DEMO_NAMES = new Set([
+  'Dyaren', 'Maoni', 'Angel', 'Ellie', 'Kembs', 'Macoy', 'chix', 'Xyra', 'Ewicuh', 'Kelly', 'Shichi'
+]);
 
 export function normalizeSocials(socials) {
   // PostgREST normally returns jsonb arrays as arrays, but older records or
@@ -36,11 +39,28 @@ function validMember(member) {
   return member && typeof member.key === 'string' && typeof member.name === 'string' && typeof member.role === 'string' && typeof member.badge === 'string';
 }
 
-function normalizeMembers(list) {
-  return list.map((member) => ({ ...member, socials: normalizeSocials(member.socials) }));
+function normalizeMembers(list, removeLegacyDemoMembers = false) {
+  return list
+    .filter((member) => !removeLegacyDemoMembers || !LEGACY_DEMO_NAMES.has(member.name?.trim()))
+    .map((member) => ({ ...member, socials: normalizeSocials(member.socials) }));
+}
+
+async function cleanLocalDemoRoster() {
+  try {
+    const service = storage();
+    const raw = await service?.getItem(ROSTER_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved) || !saved.every(validMember)) return;
+    const cleaned = normalizeMembers(saved, true);
+    if (cleaned.length !== saved.length) await service.setItem(ROSTER_KEY, JSON.stringify(cleaned));
+  } catch (error) {
+    console.warn('Local demo roster cleanup could not be completed.', error);
+  }
 }
 
 export async function readMembers() {
+  await cleanLocalDemoRoster();
   if (isSupabaseConfigured()) {
     try {
       const online = await fetchOnlineMembers();
@@ -58,7 +78,12 @@ export async function readMembers() {
     const raw = await service?.getItem(ROSTER_KEY);
     if (!raw) return [];
     const saved = JSON.parse(raw);
-    return Array.isArray(saved) && saved.every(validMember) ? normalizeMembers(saved) : [];
+    if (!Array.isArray(saved) || !saved.every(validMember)) return [];
+    const cleaned = normalizeMembers(saved, true);
+    if (cleaned.length !== saved.length) {
+      try { await service.setItem(ROSTER_KEY, JSON.stringify(cleaned)); } catch (error) { console.warn('Cleaned local roster could not be saved.', error); }
+    }
+    return cleaned;
   } catch (error) {
     console.warn('Roster could not be loaded.', error);
     return [];
