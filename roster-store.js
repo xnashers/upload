@@ -7,20 +7,6 @@ import {
   isSupabaseConfigured
 } from './online-service.js';
 
-export const DEFAULT_MEMBERS = [
-  { key: 'dyaren', badge: 'CM', name: 'Dyaren', role: 'Clan Master' },
-  { key: 'maoni', badge: 'CF', name: 'Maoni', role: 'Clan Founder' },
-  { key: 'angel', badge: 'VCM', name: 'Angel', role: 'Vice Clan Master' },
-  { key: 'ellie', badge: 'ACM', name: 'Ellie', role: 'Assistant Clan Master' },
-  { key: 'kembs', badge: 'HC', name: 'Kembs', role: 'High Council' },
-  { key: 'macoy', badge: 'PRO', name: 'Macoy', role: 'Public Relations Officer' },
-  { key: 'chix', badge: 'VIP', name: 'chix', role: 'Very Important Person' },
-  { key: 'xyra', badge: 'MUSE', name: 'Xyra', role: 'Muse' },
-  { key: 'ewicuh', badge: 'HE', name: 'Ewicuh', role: 'Head Examiner' },
-  { key: 'kelly', badge: 'EX', name: 'Kelly', role: 'Examiner' },
-  { key: 'shichi', badge: 'EX', name: 'Shichi', role: 'Examiner' }
-];
-
 export const ROSTER_KEY = 'hudASMembers';
 export const ROSTER_RESET_KEY = 'hudASRosterReset';
 export const POSTS_KEY = 'hudASPhotoPosts';
@@ -54,25 +40,28 @@ function normalizeMembers(list) {
   return list.map((member) => ({ ...member, socials: normalizeSocials(member.socials) }));
 }
 
-const defaults = () => DEFAULT_MEMBERS.map((member) => ({ ...member }));
-
 export async function readMembers() {
   if (isSupabaseConfigured()) {
     try {
       const online = await fetchOnlineMembers();
-      if (online.length) return normalizeMembers(online);
-    } catch (error) { console.warn('Online roster unavailable; using local roster.', error); }
+      // Supabase is the source of truth. An empty online roster must stay
+      // empty instead of being replaced by the old demo members.
+      return normalizeMembers(online);
+    } catch (error) {
+      console.warn('Online roster unavailable; showing an empty roster.', error);
+      return [];
+    }
   }
   try {
     const service = storage();
     if ((await service?.getItem(ROSTER_RESET_KEY)) === 'true') return [];
     const raw = await service?.getItem(ROSTER_KEY);
-    if (!raw) return defaults();
+    if (!raw) return [];
     const saved = JSON.parse(raw);
-    return Array.isArray(saved) && saved.every(validMember) ? normalizeMembers(saved) : defaults();
+    return Array.isArray(saved) && saved.every(validMember) ? normalizeMembers(saved) : [];
   } catch (error) {
     console.warn('Roster could not be loaded.', error);
-    return defaults();
+    return [];
   }
 }
 

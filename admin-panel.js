@@ -1,5 +1,4 @@
 import {
-  DEFAULT_MEMBERS,
   normalizeSocials,
   readMembers,
   saveMembers,
@@ -35,11 +34,7 @@ let newMemberSocials = [];
 let editMemberSocials = [];
 
 const SOCIAL_PLATFORMS = ['facebook', 'discord', 'tiktok'];
-const memberName = (member) => {
-  const defaultMember = DEFAULT_MEMBERS.find((item) => item.key === member.key);
-  if (!defaultMember || member.name !== defaultMember.name) return member.name;
-  return t(`member.${member.key}.name`);
-};
+const memberName = (member) => member?.name || '';
 const storage = () => window.miniappsAI?.storage;
 
 function socialLabel(platform) {

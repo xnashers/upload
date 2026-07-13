@@ -1,5 +1,5 @@
 import { setupAdminPanel } from './admin-panel.js';
-import { DEFAULT_MEMBERS, normalizeSocials, readMembers, readPosts, readPortraits } from './roster-store.js';
+import { normalizeSocials, readMembers, readPosts, readPortraits } from './roster-store.js';
 
 const PLATFORM_META = {
   facebook: { slug: 'facebook' },
@@ -23,26 +23,20 @@ function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
 }
 
-function localizedMember(member) {
-  const defaultMember = DEFAULT_MEMBERS.find((item) => item.key === member.key);
-  if (!defaultMember) return member;
-  // Localize untouched seed fields independently, without hiding an admin's
-  // deliberate name or role edit behind the default translation.
-  return {
-    ...member,
-    name: member.name === defaultMember.name ? t(`member.${member.key}.name`) : member.name,
-    role: member.role === defaultMember.role ? t(`member.${member.key}.role`) : member.role
-  };
-}
-
 function renderMembers() {
   const grid = document.getElementById('memberGrid');
   if (!grid) return;
+  if (!members.length) {
+    grid.innerHTML = `<p class="member-empty">${escapeHtml(t('members.empty'))}</p>`;
+    const count = document.getElementById('memberCount');
+    if (count) count.textContent = '00';
+    return;
+  }
   const lights = ['#f7a9d5', '#cf9dff', '#ff8ebd', '#d9adff'];
   const deeps = ['#713c91', '#542b82', '#8c326d', '#43266e'];
   const darks = ['#b35ca2', '#8156c2', '#c14e94', '#7655af'];
   grid.innerHTML = members.map((rawMember, index) => {
-    const member = localizedMember(rawMember);
+    const member = rawMember;
     return `<article class="member-card sparkle-hover" tabindex="0" role="button" data-member-key="${escapeHtml(member.key)}" aria-label="${escapeHtml(t('members.openProfile', { name: member.name }))}" style="--avatar-light:${lights[index % 4]};--avatar-deep:${deeps[index % 4]};--avatar-dark:${darks[index % 4]}">
       <div class="member-portrait"><img src="${escapeHtml(portraits[member.key]?.publicUrl || ASSETS.memberDummy)}" alt="${escapeHtml(member.name)}"></div>
       <div class="member-info"><span class="member-badge">${escapeHtml(member.badge)}</span><h3>${escapeHtml(member.name)}</h3><p>${escapeHtml(member.role)}</p></div>
@@ -66,12 +60,11 @@ function renderMemberProfile(member) {
   const role = document.getElementById('memberProfileRole');
   const socials = document.getElementById('memberProfileSocials');
   if (!image || !badge || !name || !role || !socials || !member) return;
-  const localized = localizedMember(member);
   image.src = portraits[member.key]?.publicUrl || ASSETS.memberDummy;
-  image.alt = localized.name;
-  badge.textContent = localized.badge;
-  name.textContent = localized.name;
-  role.textContent = localized.role;
+  image.alt = member.name;
+  badge.textContent = member.badge;
+  name.textContent = member.name;
+  role.textContent = member.role;
   const links = normalizeSocials(member.socials).map((social) => ({ ...social, url: safeSocialUrl(social.url) })).filter((social) => PLATFORM_META[social.platform]?.slug && social.url);
   socials.innerHTML = links.length ? links.map((social) => {
     const label = t(`social.${social.platform}`);

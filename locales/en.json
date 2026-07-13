@@ -19,7 +19,8 @@
     "openProfile": "Open {name} profile",
     "closeProfile": "Close member profile",
     "positionLabel": "Position",
-    "noSocials": "No social links have been added yet."
+    "noSocials": "No social links have been added yet.",
+    "empty": "No members have been added yet. Check back soon."
   },
   "social": {
     "facebook": "Facebook",
@@ -117,19 +118,6 @@
     "successTitle": "Application received.",
     "successCopy": "Your signal is in the stars. We’ll get back to you soon.",
     "done": "Done"
-  },
-  "member": {
-    "dyaren": { "name": "Dyaren", "role": "Clan Master" },
-    "maoni": { "name": "Maoni", "role": "Clan Founder" },
-    "angel": { "name": "Angel", "role": "Vice Clan Master" },
-    "ellie": { "name": "Ellie", "role": "Assistant Clan Master" },
-    "kembs": { "name": "Kembs", "role": "High Council" },
-    "macoy": { "name": "Macoy", "role": "Public Relations Officer" },
-    "chix": { "name": "chix", "role": "Very Important Person" },
-    "xyra": { "name": "Xyra", "role": "Muse" },
-    "ewicuh": { "name": "Ewicuh", "role": "Head Examiner" },
-    "kelly": { "name": "Kelly", "role": "Examiner" },
-    "shichi": { "name": "Shichi", "role": "Examiner" }
   },
   "admin": {
     "browserTitle": "HUDAS Roster Admin",
