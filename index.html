@@ -2,15 +2,160 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pocket Farm</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#210d35">
+  <title>HUDAS Clan Recruitment</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-  <div id="app" class="min-h-screen"></div>
-  <script src="polyfills.js"></script>
+<body>
+  <a class="skip-link" href="#main-content" data-i18n="app.skip">Skip to content</a>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand sparkle-hover" href="#home" data-i18n-aria-label="app.homeLabel" aria-label="HUDAS home">
+        <span class="brand-mark"><img id="brandIcon" alt="HUDAS clan icon"></span>
+        <span class="brand-copy"><strong>HUDAS</strong><small data-i18n="app.brandTag">Clan community</small></span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav" data-i18n-aria-label="app.menu"> <span data-i18n="app.menuText">Menu</span></button>
+      <nav class="site-nav" id="siteNav" data-i18n-aria-label="app.primaryNav" aria-label="Primary navigation">
+        <a class="nav-link active sparkle-hover" href="#home" data-section="home" data-i18n="nav.home">Home</a>
+        <a class="nav-link sparkle-hover" href="#about" data-section="about" data-i18n="nav.about">About us</a>
+        <a class="nav-link sparkle-hover" href="#officers" data-section="officers" data-i18n="nav.officers">Officers</a>
+        <a class="nav-link sparkle-hover" href="#gallery" data-section="gallery" data-i18n="nav.gallery">Gallery</a>
+        <a class="nav-link sparkle-hover" href="#rules" data-section="rules" data-i18n="nav.rules">Rules</a>
+        <button class="nav-apply sparkle-hover" type="button" data-open-apply data-i18n="app.apply">Apply to join</button>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero section-anchor" id="home" aria-labelledby="heroTitle">
+        <div class="hero-content">
+          <p class="eyebrow" data-i18n="hero.eyebrow">HUMANS UNITED · DREAMS ASSEMBLED</p>
+          <img class="title-banner" id="titleBanner" alt="HUDAS clan title banner">
+          <h1 id="heroTitle" data-i18n="hero.title">Find your people. Make your mark.</h1>
+          <p class="hero-copy" data-i18n="hero.copy">A spirited clan built on loyalty, creativity, and the kind of teamwork that turns every session into a story.</p>
+          <div class="hero-actions">
+            <button class="button button-primary sparkle-hover" type="button" data-open-apply><span data-i18n="hero.apply">Apply for clan recruitment</span><span aria-hidden="true">↗</span></button>
+            <a class="button button-ghost sparkle-hover" href="#officers"><span data-i18n="hero.meet">Meet the officers</span><span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-stats" data-i18n-aria-label="hero.highlights" aria-label="Clan highlights">
+            <div><strong>11</strong><span data-i18n="hero.statMembers">core members</span></div>
+            <div><strong>01</strong><span data-i18n="hero.statHome">shared home</span></div>
+            <div><strong>∞</strong><span data-i18n="hero.statEnergy">good energy</span></div>
+          </div>
+        </div>
+        <div class="hero-orbit orbit-one" aria-hidden="true"></div>
+        <div class="hero-orbit orbit-two" aria-hidden="true"></div>
+        <span class="scroll-cue" aria-hidden="true">✦</span>
+      </section>
+
+      <section class="content-section about-section section-anchor" id="about" aria-labelledby="aboutTitle">
+        <div class="section-intro">
+          <p class="eyebrow" data-i18n="about.eyebrow">THE HUDAS WAY</p>
+          <h2 id="aboutTitle" data-i18n="about.title">More than a clan. It’s a constellation.</h2>
+        </div>
+        <div class="about-grid">
+          <p class="lead" data-i18n="about.lead">HUDAS is a welcoming corner for bold players, creative minds, and dependable teammates. We show up for the win, but stay for the people.</p>
+          <div class="about-note">
+            <span class="note-star" aria-hidden="true">✦</span>
+            <p data-i18n="about.note">Bring your own light. We’ll make room for it.</p>
+          </div>
+        </div>
+        <div class="value-row">
+          <article class="value-card sparkle-hover"><span>01</span><h3 data-i18n="about.value1Title">Stay kind</h3><p data-i18n="about.value1Copy">Respect is our loudest flex.</p></article>
+          <article class="value-card sparkle-hover"><span>02</span><h3 data-i18n="about.value2Title">Play loud</h3><p data-i18n="about.value2Copy">Bring ideas, energy, and a little chaos.</p></article>
+          <article class="value-card sparkle-hover"><span>03</span><h3 data-i18n="about.value3Title">Grow together</h3><p data-i18n="about.value3Copy">Everyone gets a chance to shine.</p></article>
+        </div>
+      </section>
+
+      <section class="content-section members-section section-anchor" id="officers" aria-labelledby="officersTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow" data-i18n="officers.eyebrow">THE HUDAS OFFICERS</p><h2 id="officersTitle" data-i18n="officers.title">Meet the officers</h2></div>
+          <p data-i18n="officers.copy">The officers guiding the crew, the laughs, and the late-night plans.</p>
+        </div>
+        <div class="member-grid" id="memberGrid"></div>
+      </section>
+
+      <section class="content-section gallery-section section-anchor" id="gallery" aria-labelledby="galleryTitle">
+        <div class="section-heading"><div><p class="eyebrow" data-i18n="gallery.eyebrow">SNAPSHOTS FROM OUR ORBIT</p><h2 id="galleryTitle" data-i18n="gallery.title">A little moodboard</h2></div><p data-i18n="gallery.copy">No two nights look the same around here.</p></div>
+        <div class="gallery-grid">
+          <article class="gallery-card gallery-wide sparkle-hover"><span class="gallery-label" data-i18n="gallery.card1Label">After hours</span><strong data-i18n="gallery.card1Title">Make memories, not excuses.</strong></article>
+          <article class="gallery-card gallery-tall sparkle-hover"><span class="gallery-label" data-i18n="gallery.card2Label">On mission</span><strong data-i18n="gallery.card2Title">Eyes up. Energy on.</strong></article>
+          <article class="gallery-card gallery-small sparkle-hover"><span class="gallery-label" data-i18n="gallery.card3Label">The crew</span><strong data-i18n="gallery.card3Title">Better together.</strong></article>
+          <article class="gallery-card gallery-small gallery-accent sparkle-hover"><span class="gallery-label" data-i18n="gallery.card4Label">Always</span><strong data-i18n="gallery.card4Title">Find your spark.</strong></article>
+        </div>
+      </section>
+
+      <section class="content-section rules-section section-anchor" id="rules" aria-labelledby="rulesTitle">
+        <div class="rules-layout"><div class="rules-stamp" aria-hidden="true">HUDAS<br><span>✦</span><br><span data-i18n="rules.code">CODE</span></div><div><p class="eyebrow" data-i18n="rules.eyebrow">THE CONSTELLATION CODE</p><h2 id="rulesTitle" data-i18n="rules.title">Simple rules. Strong orbit.</h2><div class="rules-list" id="rulesList"></div><button class="button button-primary sparkle-hover" type="button" data-open-apply><span data-i18n="rules.cta">I’m ready to apply</span><span aria-hidden="true">↗</span></button></div></div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span data-i18n="footer.copyright">HUDAS © 2025</span><span data-i18n="footer.copy">Built with heart, held by the crew.</span><button class="admin-footer-link" type="button" data-open-admin data-i18n="admin.footerLink">Roster admin</button><a href="#top" data-i18n="footer.back">Back to top ↑</a></footer>
+  </div>
+
+  <div class="modal-backdrop" id="applyModal" hidden>
+    <section class="apply-modal" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
+      <button class="modal-close" id="closeModal" type="button" data-i18n-aria-label="modal.close">×</button>
+      <div id="applyFormView"><p class="eyebrow" data-i18n="modal.eyebrow">STEP INTO THE ORBIT</p><h2 id="applyTitle" data-i18n="modal.title">Ready to join HUDAS?</h2><p class="modal-copy" data-i18n="modal.copy">Tell us a little about yourself. The crew will be in touch.</p><form id="applyForm"><label><span data-i18n="modal.name">Name or alias</span><input name="name" required autocomplete="name" data-i18n-placeholder="modal.namePlaceholder"></label><label><span data-i18n="modal.discord">Discord handle</span><input name="discord" required data-i18n-placeholder="modal.discordPlaceholder"></label><label><span data-i18n="modal.reason">Why HUDAS?</span><textarea name="reason" rows="3" required data-i18n-placeholder="modal.reasonPlaceholder"></textarea></label><button class="button button-primary" type="submit"><span data-i18n="modal.submit">Send application</span><span aria-hidden="true">✦</span></button><p class="form-status" id="formStatus" role="status"></p></form></div>
+      <div class="success-view" id="successView" hidden><span class="success-icon">✦</span><h2 data-i18n="modal.successTitle">Application received.</h2><p data-i18n="modal.successCopy">Your signal is in the stars. We’ll get back to you soon.</p><button class="button button-ghost" id="doneButton" type="button" data-i18n="modal.done">Done</button></div>
+    </section>
+  </div>
+  <div class="modal-backdrop" id="adminModal" hidden>
+    <section class="apply-modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminPopupTitle">
+      <button class="modal-close" id="closeAdminModal" type="button" data-i18n-aria-label="admin.close">×</button>
+      <div class="admin-popup-heading">
+        <p class="eyebrow" data-i18n="admin.pageEyebrow">PRIVATE ROSTER AREA</p>
+        <h2 id="adminPopupTitle" data-i18n="admin.modalTitle">Roster admin</h2>
+      </div>
+      <section class="admin-gate" id="adminGate" aria-labelledby="adminGateTitle">
+        <div class="admin-gate-copy">
+          <p class="eyebrow" data-i18n="admin.loginEyebrow">SECURE ROSTER LOGIN</p>
+          <h3 id="adminGateTitle" data-i18n="admin.title">Sign in to roster admin</h3>
+          <p data-i18n="admin.copy">Use your HUDAS admin credentials to manage officer portraits.</p>
+        </div>
+        <form class="admin-form" id="adminForm" autocomplete="on">
+          <label>
+            <span data-i18n="admin.usernameLabel">Username</span>
+            <input id="adminUsername" name="username" type="text" autocomplete="username" autocapitalize="none" required data-i18n-placeholder="admin.usernamePlaceholder">
+          </label>
+          <label>
+            <span data-i18n="admin.passwordLabel">Password</span>
+            <input id="adminPassword" name="password" type="password" autocomplete="current-password" required data-i18n-placeholder="admin.passwordPlaceholder">
+          </label>
+          <button class="button button-primary" type="submit"><span data-i18n="admin.signIn">Sign in</span><span aria-hidden="true">→</span></button>
+          <p class="admin-status" id="adminStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <section class="portrait-manager admin-panel" id="portraitManager" aria-labelledby="portraitManagerTitle" hidden>
+        <div class="portrait-manager-copy">
+          <div class="admin-panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="officers.manageEyebrow">Officer portraits</p>
+              <h3 id="portraitManagerTitle" data-i18n="officers.managerTitle">Update the crew gallery</h3>
+            </div>
+            <button class="admin-lock" id="lockAdmin" type="button" data-i18n="admin.lock">Lock admin tools</button>
+          </div>
+          <p data-i18n="officers.managerCopy">Upload a portrait for any officer. Your images are saved for this HUDAS roster, and you can remove them whenever you like.</p>
+        </div>
+        <form class="portrait-form" id="portraitForm">
+          <label>
+            <span data-i18n="officers.selectOfficer">Officer</span>
+            <select id="portraitMember" name="member" required></select>
+          </label>
+          <label>
+            <span data-i18n="officers.imageFile">Portrait image</span>
+            <input id="portraitFile" name="portrait" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required>
+          </label>
+          <div class="portrait-actions">
+            <button class="button button-primary" type="submit"><span data-i18n="officers.upload">Upload portrait</span><span aria-hidden="true">↑</span></button>
+            <button class="button button-ghost" id="removePortrait" type="button" data-i18n="officers.remove">Remove custom image</button>
+          </div>
+          <p class="portrait-status" id="portraitStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="main.js"></script>
 </body>
 </html>
