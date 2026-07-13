@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#210d35">
+  <meta name="theme-color" content="#3a383a">
   <title>HUDAS Clan Recruitment</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -19,10 +19,10 @@
       <nav class="site-nav" id="siteNav" data-i18n-aria-label="app.primaryNav" aria-label="Primary navigation">
         <a class="nav-link active sparkle-hover" href="#home" data-section="home" data-i18n="nav.home">Home</a>
         <a class="nav-link sparkle-hover" href="#about" data-section="about" data-i18n="nav.about">About us</a>
-        <a class="nav-link sparkle-hover" href="#officers" data-section="officers" data-i18n="nav.officers">Officers</a>
+        <a class="nav-link sparkle-hover" href="#members" data-section="members" data-i18n="nav.officers">Members</a>
         <a class="nav-link sparkle-hover" href="#gallery" data-section="gallery" data-i18n="nav.gallery">Gallery</a>
         <a class="nav-link sparkle-hover" href="#rules" data-section="rules" data-i18n="nav.rules">Rules</a>
-        <button class="nav-apply sparkle-hover" type="button" data-open-apply data-i18n="app.apply">Apply to join</button>
+        <a class="nav-apply sparkle-hover" href="https://discord.com/invite/uMqUUsY3Xt" target="_top" data-i18n="app.apply">Apply to join</a>
       </nav>
     </header>
 
@@ -34,11 +34,11 @@
           <h1 id="heroTitle" data-i18n="hero.title">Find your people. Make your mark.</h1>
           <p class="hero-copy" data-i18n="hero.copy">A spirited clan built on loyalty, creativity, and the kind of teamwork that turns every session into a story.</p>
           <div class="hero-actions">
-            <button class="button button-primary sparkle-hover" type="button" data-open-apply><span data-i18n="hero.apply">Apply for clan recruitment</span><span aria-hidden="true">↗</span></button>
-            <a class="button button-ghost sparkle-hover" href="#officers"><span data-i18n="hero.meet">Meet the officers</span><span aria-hidden="true">↓</span></a>
+            <a class="button button-primary sparkle-hover" href="https://discord.com/invite/uMqUUsY3Xt" target="_top"><span data-i18n="hero.apply">Apply for clan recruitment</span><span aria-hidden="true">↗</span></a>
+            <a class="button button-ghost sparkle-hover" href="#members"><span data-i18n="hero.meet">Meet the members</span><span aria-hidden="true">↓</span></a>
           </div>
           <div class="hero-stats" data-i18n-aria-label="hero.highlights" aria-label="Clan highlights">
-            <div><strong>11</strong><span data-i18n="hero.statMembers">core members</span></div>
+            <div><strong id="memberCount">11</strong><span data-i18n="hero.statMembers">core members</span></div>
             <div><strong>01</strong><span data-i18n="hero.statHome">shared home</span></div>
             <div><strong>∞</strong><span data-i18n="hero.statEnergy">good energy</span></div>
           </div>
@@ -67,39 +67,36 @@
         </div>
       </section>
 
-      <section class="content-section members-section section-anchor" id="officers" aria-labelledby="officersTitle">
+      <section class="content-section members-section section-anchor" id="members" aria-labelledby="membersTitle">
         <div class="section-heading">
-          <div><p class="eyebrow" data-i18n="officers.eyebrow">THE HUDAS OFFICERS</p><h2 id="officersTitle" data-i18n="officers.title">Meet the officers</h2></div>
-          <p data-i18n="officers.copy">The officers guiding the crew, the laughs, and the late-night plans.</p>
+          <div><p class="eyebrow" data-i18n="officers.eyebrow">THE HUDAS MEMBERS</p><h2 id="membersTitle" data-i18n="officers.title">Meet the members</h2></div>
+          <p data-i18n="officers.copy">The members guiding the crew, the laughs, and the late-night plans.</p>
         </div>
         <div class="member-grid" id="memberGrid"></div>
       </section>
 
       <section class="content-section gallery-section section-anchor" id="gallery" aria-labelledby="galleryTitle">
-        <div class="section-heading"><div><p class="eyebrow" data-i18n="gallery.eyebrow">SNAPSHOTS FROM OUR ORBIT</p><h2 id="galleryTitle" data-i18n="gallery.title">A little moodboard</h2></div><p data-i18n="gallery.copy">No two nights look the same around here.</p></div>
-        <div class="gallery-grid">
-          <article class="gallery-card gallery-wide sparkle-hover"><span class="gallery-label" data-i18n="gallery.card1Label">After hours</span><strong data-i18n="gallery.card1Title">Make memories, not excuses.</strong></article>
-          <article class="gallery-card gallery-tall sparkle-hover"><span class="gallery-label" data-i18n="gallery.card2Label">On mission</span><strong data-i18n="gallery.card2Title">Eyes up. Energy on.</strong></article>
-          <article class="gallery-card gallery-small sparkle-hover"><span class="gallery-label" data-i18n="gallery.card3Label">The crew</span><strong data-i18n="gallery.card3Title">Better together.</strong></article>
-          <article class="gallery-card gallery-small gallery-accent sparkle-hover"><span class="gallery-label" data-i18n="gallery.card4Label">Always</span><strong data-i18n="gallery.card4Title">Find your spark.</strong></article>
+        <div class="section-heading"><div><p class="eyebrow" data-i18n="gallery.eyebrow">SNAPSHOTS FROM OUR ORBIT</p><h2 id="galleryTitle" data-i18n="gallery.title">Our latest Post</h2></div></div>
+        <div class="gallery-grid" id="snapshotGrid">
+          <article class="gallery-card gallery-wide sparkle-hover" data-gallery-slot="0"><img class="gallery-image" alt="" aria-hidden="true" hidden><span class="gallery-label" data-i18n="gallery.card1Label">After hours</span><strong data-i18n="gallery.card1Title">Make memories, not excuses.</strong></article>
+          <article class="gallery-card gallery-tall sparkle-hover" data-gallery-slot="1"><img class="gallery-image" alt="" aria-hidden="true" hidden><span class="gallery-label" data-i18n="gallery.card2Label">On mission</span><strong data-i18n="gallery.card2Title">Eyes up. Energy on.</strong></article>
+          <article class="gallery-card gallery-small sparkle-hover" data-gallery-slot="2"><img class="gallery-image" alt="" aria-hidden="true" hidden><span class="gallery-label" data-i18n="gallery.card3Label">The crew</span><strong data-i18n="gallery.card3Title">Better together.</strong></article>
+          <article class="gallery-card gallery-small gallery-accent sparkle-hover" data-gallery-slot="3"><img class="gallery-image" alt="" aria-hidden="true" hidden><span class="gallery-label" data-i18n="gallery.card4Label">Always</span><strong data-i18n="gallery.card4Title">Find your spark.</strong></article>
+        </div>
+        <div class="community-posts" id="communityPosts" hidden>
+          <div class="community-posts-heading"><p class="eyebrow" data-i18n="gallery.postsEyebrow">FROM THE CREW</p><h3 data-i18n="gallery.postsTitle">Community posts</h3></div>
+          <div class="post-grid" id="postGrid"></div>
         </div>
       </section>
 
       <section class="content-section rules-section section-anchor" id="rules" aria-labelledby="rulesTitle">
-        <div class="rules-layout"><div class="rules-stamp" aria-hidden="true">HUDAS<br><span>✦</span><br><span data-i18n="rules.code">CODE</span></div><div><p class="eyebrow" data-i18n="rules.eyebrow">THE CONSTELLATION CODE</p><h2 id="rulesTitle" data-i18n="rules.title">Simple rules. Strong orbit.</h2><div class="rules-list" id="rulesList"></div><button class="button button-primary sparkle-hover" type="button" data-open-apply><span data-i18n="rules.cta">I’m ready to apply</span><span aria-hidden="true">↗</span></button></div></div>
+        <div class="rules-layout"><div class="rules-stamp" aria-hidden="true">HUDAS<br><span>✦</span><br><span data-i18n="rules.code">CODE</span></div><div><p class="eyebrow" data-i18n="rules.eyebrow">THE CONSTELLATION CODE</p><h2 id="rulesTitle" data-i18n="rules.title">Simple rules. Strong orbit.</h2><div class="rules-list" id="rulesList"></div><a class="button button-primary sparkle-hover" href="https://discord.com/invite/uMqUUsY3Xt" target="_top"><span data-i18n="rules.cta">I’m ready to apply</span><span aria-hidden="true">↗</span></a></div></div>
       </section>
     </main>
 
     <footer class="site-footer"><span data-i18n="footer.copyright">HUDAS © 2025</span><span data-i18n="footer.copy">Built with heart, held by the crew.</span><button class="admin-footer-link" type="button" data-open-admin data-i18n="admin.footerLink">Roster admin</button><a href="#top" data-i18n="footer.back">Back to top ↑</a></footer>
   </div>
 
-  <div class="modal-backdrop" id="applyModal" hidden>
-    <section class="apply-modal" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
-      <button class="modal-close" id="closeModal" type="button" data-i18n-aria-label="modal.close">×</button>
-      <div id="applyFormView"><p class="eyebrow" data-i18n="modal.eyebrow">STEP INTO THE ORBIT</p><h2 id="applyTitle" data-i18n="modal.title">Ready to join HUDAS?</h2><p class="modal-copy" data-i18n="modal.copy">Tell us a little about yourself. The crew will be in touch.</p><form id="applyForm"><label><span data-i18n="modal.name">Name or alias</span><input name="name" required autocomplete="name" data-i18n-placeholder="modal.namePlaceholder"></label><label><span data-i18n="modal.discord">Discord handle</span><input name="discord" required data-i18n-placeholder="modal.discordPlaceholder"></label><label><span data-i18n="modal.reason">Why HUDAS?</span><textarea name="reason" rows="3" required data-i18n-placeholder="modal.reasonPlaceholder"></textarea></label><button class="button button-primary" type="submit"><span data-i18n="modal.submit">Send application</span><span aria-hidden="true">✦</span></button><p class="form-status" id="formStatus" role="status"></p></form></div>
-      <div class="success-view" id="successView" hidden><span class="success-icon">✦</span><h2 data-i18n="modal.successTitle">Application received.</h2><p data-i18n="modal.successCopy">Your signal is in the stars. We’ll get back to you soon.</p><button class="button button-ghost" id="doneButton" type="button" data-i18n="modal.done">Done</button></div>
-    </section>
-  </div>
   <div class="modal-backdrop" id="adminModal" hidden>
     <section class="apply-modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminPopupTitle">
       <button class="modal-close" id="closeAdminModal" type="button" data-i18n-aria-label="admin.close">×</button>
@@ -111,11 +108,11 @@
         <div class="admin-gate-copy">
           <p class="eyebrow" data-i18n="admin.loginEyebrow">SECURE ROSTER LOGIN</p>
           <h3 id="adminGateTitle" data-i18n="admin.title">Sign in to roster admin</h3>
-          <p data-i18n="admin.copy">Use your HUDAS admin credentials to manage officer portraits.</p>
+          <p data-i18n="admin.copy">Use your HUDAS admin credentials to manage the crew roster and member images.</p>
         </div>
         <form class="admin-form" id="adminForm" autocomplete="on">
           <label>
-            <span data-i18n="admin.usernameLabel">Username</span>
+            <span data-i18n="admin.usernameLabel">Admin email</span>
             <input id="adminUsername" name="username" type="text" autocomplete="username" autocapitalize="none" required data-i18n-placeholder="admin.usernamePlaceholder">
           </label>
           <label>
@@ -130,29 +127,174 @@
         <div class="portrait-manager-copy">
           <div class="admin-panel-heading">
             <div>
-              <p class="eyebrow" data-i18n="officers.manageEyebrow">Officer portraits</p>
-              <h3 id="portraitManagerTitle" data-i18n="officers.managerTitle">Update the crew gallery</h3>
+              <p class="eyebrow" data-i18n="admin.memberImagesEyebrow">Member images</p>
+              <h3 id="portraitManagerTitle" data-i18n="admin.memberImagesTitle">Build the crew roster</h3>
             </div>
-            <button class="admin-lock" id="lockAdmin" type="button" data-i18n="admin.lock">Lock admin tools</button>
+            <div class="admin-session-actions"><button class="admin-lock" id="signOutAdmin" type="button" data-i18n="admin.signOut">Sign out</button><button class="admin-lock" id="lockAdmin" type="button" data-i18n="admin.lock">Lock admin tools</button></div>
           </div>
-          <p data-i18n="officers.managerCopy">Upload a portrait for any officer. Your images are saved for this HUDAS roster, and you can remove them whenever you like.</p>
+          <p data-i18n="admin.memberImagesCopy">Add each member with a name, role, badge, and image so the roster feels complete.</p>
         </div>
-        <form class="portrait-form" id="portraitForm">
-          <label>
-            <span data-i18n="officers.selectOfficer">Officer</span>
-            <select id="portraitMember" name="member" required></select>
-          </label>
-          <label>
-            <span data-i18n="officers.imageFile">Portrait image</span>
-            <input id="portraitFile" name="portrait" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required>
-          </label>
-          <div class="portrait-actions">
-            <button class="button button-primary" type="submit"><span data-i18n="officers.upload">Upload portrait</span><span aria-hidden="true">↑</span></button>
-            <button class="button button-ghost" id="removePortrait" type="button" data-i18n="officers.remove">Remove custom image</button>
+        <div class="admin-dashboard" aria-labelledby="adminDashboardTitle">
+          <div class="admin-dashboard-intro">
+            <p class="eyebrow" data-i18n="admin.dashboardEyebrow">ROSTER CONTROL CENTER</p>
+            <h3 id="adminDashboardTitle" data-i18n="admin.dashboardTitle">Choose a tool</h3>
+            <p data-i18n="admin.dashboardCopy">Open one focused tool at a time. Your roster stays tidy and easy to manage.</p>
           </div>
-          <p class="portrait-status" id="portraitStatus" role="status" aria-live="polite"></p>
-        </form>
+          <div class="admin-action-grid">
+            <button class="admin-action-card" type="button" data-admin-tool="membersTool">
+              <span class="admin-action-icon" aria-hidden="true">+</span>
+              <span class="admin-action-copy"><strong data-i18n="admin.memberToolButton">Add member</strong><small data-i18n="admin.memberToolCopy">Add a member with an image</small></span>
+              <span class="admin-action-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button class="admin-action-card" type="button" data-admin-tool="editMemberTool">
+              <span class="admin-action-icon" aria-hidden="true">✎</span>
+              <span class="admin-action-copy"><strong data-i18n="admin.editMemberToolButton">Edit member</strong><small data-i18n="admin.editMemberToolCopy">Update a name, role, badge, or image</small></span>
+              <span class="admin-action-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button class="admin-action-card" type="button" data-admin-tool="socialsTool">
+              <span class="admin-action-icon" aria-hidden="true">◎</span>
+              <span class="admin-action-copy"><strong data-i18n="admin.socialToolButton">Social links</strong><small data-i18n="admin.socialToolCopy">Choose a platform for any member</small></span>
+              <span class="admin-action-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button class="admin-action-card" type="button" data-admin-tool="postsTool">
+              <span class="admin-action-icon" aria-hidden="true">▧</span>
+              <span class="admin-action-copy"><strong data-i18n="admin.moodboardToolButton">A little moodboard</strong><small data-i18n="admin.moodboardToolCopy">Manage the live snapshot images</small></span>
+              <span class="admin-action-arrow" aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+        <div class="admin-tool-modal" id="membersTool" role="dialog" aria-modal="true" aria-labelledby="memberToolsTitle" hidden>
+          <div class="admin-tool-dialog">
+            <div class="admin-tool-dialog-heading"><div><p class="eyebrow" data-i18n="admin.memberToolsEyebrow">ROSTER EDITOR</p><h3 data-i18n="admin.memberToolsTitle">Add a member</h3></div><button class="admin-tool-close" type="button" data-close-admin-tool data-i18n-aria-label="admin.closeTool">×</button></div>
+          <section class="admin-tool-card" aria-labelledby="memberToolsTitle">
+            <p class="eyebrow" data-i18n="admin.memberToolsEyebrow">ROSTER EDITOR</p>
+            <h3 id="memberToolsTitle" data-i18n="admin.memberToolsTitle">Add a member</h3>
+            <p data-i18n="admin.memberToolsCopy">Add a name, role, badge, and image to the crew roster.</p>
+            <form class="admin-tool-form" id="memberForm">
+              <label><span data-i18n="admin.memberNameLabel">Member name</span><input id="memberName" name="name" required maxlength="40" data-i18n-placeholder="admin.memberNamePlaceholder"></label>
+              <label><span data-i18n="admin.memberRoleLabel">Role</span><input id="memberRole" name="role" required maxlength="60" data-i18n-placeholder="admin.memberRolePlaceholder"></label>
+              <label><span data-i18n="admin.memberBadgeLabel">Badge</span><input id="memberBadge" name="badge" required maxlength="8" data-i18n-placeholder="admin.memberBadgePlaceholder"></label>
+              <label><span data-i18n="admin.memberImageLabel">Member image</span><input id="memberImage" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required></label>
+              <fieldset class="social-fields">
+                <legend data-i18n="admin.socialLinksLabel">Social media links</legend>
+                <p class="field-help" data-i18n="admin.socialLinksCopy">Choose a platform and add the member’s profile link.</p>
+                <div class="social-entry-row">
+                  <label><span data-i18n="admin.socialPlatformLabel">Platform</span><select id="memberSocialPlatform"><option value="facebook" data-i18n="social.facebook">Facebook</option><option value="discord" data-i18n="social.discord">Discord</option><option value="tiktok" data-i18n="social.tiktok">TikTok</option></select></label>
+                  <label class="social-url-field"><span data-i18n="admin.socialUrlLabel">Profile URL</span><input id="memberSocialUrl" type="url" data-i18n-placeholder="admin.socialUrlPlaceholder" placeholder="https://..."></label>
+                  <button class="button button-ghost social-add-button" id="addMemberSocial" type="button"><span data-i18n="admin.addSocial">Add link</span><span aria-hidden="true">+</span></button>
+                </div>
+                <div class="social-link-list" id="memberSocialList" aria-live="polite"></div>
+              </fieldset>
+              <button class="button button-primary" type="submit"><span data-i18n="admin.addMember">Add member</span><span aria-hidden="true">+</span></button>
+              <p class="admin-tool-status" id="memberStatus" role="status" aria-live="polite"></p>
+            </form>
+            <div class="remove-member-row">
+              <label><span data-i18n="admin.memberRemoveLabel">Remove member</span><select id="removeMember"></select></label>
+              <button class="button button-ghost" id="removeMemberButton" type="button" data-i18n="admin.removeMember">Remove</button>
+            </div>
+          </section>
+          </div>
+        </div>
+        <div class="admin-tool-modal" id="editMemberTool" role="dialog" aria-modal="true" aria-labelledby="editMemberToolsTitle" hidden>
+          <div class="admin-tool-dialog">
+            <div class="admin-tool-dialog-heading"><div><p class="eyebrow" data-i18n="admin.editMemberToolsEyebrow">ROSTER EDITOR</p><h3 id="editMemberToolsTitle" data-i18n="admin.editMemberToolsTitle">Edit member details</h3></div><button class="admin-tool-close" type="button" data-close-admin-tool data-i18n-aria-label="admin.closeTool">×</button></div>
+            <section class="admin-tool-card" aria-labelledby="editMemberToolsTitle">
+              <p class="eyebrow" data-i18n="admin.editMemberToolsEyebrow">ROSTER EDITOR</p>
+              <h3 data-i18n="admin.editMemberToolsTitle">Edit member details</h3>
+              <p data-i18n="admin.editMemberToolsCopy">Choose a member, update their details, and optionally replace their portrait.</p>
+              <form class="admin-tool-form" id="editMemberForm">
+                <label><span data-i18n="admin.editMemberSelectLabel">Member</span><select id="editMember" required></select></label>
+                <label><span data-i18n="admin.memberNameLabel">Member name</span><input id="editMemberName" maxlength="40" required data-i18n-placeholder="admin.memberNamePlaceholder"></label>
+                <label><span data-i18n="admin.memberRoleLabel">Role</span><input id="editMemberRole" maxlength="60" required data-i18n-placeholder="admin.memberRolePlaceholder"></label>
+                <label><span data-i18n="admin.memberBadgeLabel">Badge</span><input id="editMemberBadge" maxlength="8" required data-i18n-placeholder="admin.memberBadgePlaceholder"></label>
+                <label><span><span data-i18n="admin.editMemberImageLabel">Replace member image</span> <small data-i18n="admin.optional">(optional)</small></span><input id="editMemberImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label>
+                <fieldset class="social-fields">
+                  <legend data-i18n="admin.editSocialLinksLabel">Social media links</legend>
+                  <p class="field-help" data-i18n="admin.editSocialLinksCopy">Add or update this member’s profile links.</p>
+                  <div class="social-entry-row">
+                    <label><span data-i18n="admin.socialPlatformLabel">Platform</span><select id="editMemberSocialPlatform"><option value="facebook" data-i18n="social.facebook">Facebook</option><option value="discord" data-i18n="social.discord">Discord</option><option value="tiktok" data-i18n="social.tiktok">TikTok</option></select></label>
+                    <label class="social-url-field"><span data-i18n="admin.socialUrlLabel">Profile URL</span><input id="editMemberSocialUrl" type="url" data-i18n-placeholder="admin.socialUrlPlaceholder" placeholder="https://..."></label>
+                    <button class="button button-ghost social-add-button" id="addEditMemberSocial" type="button"><span data-i18n="admin.addSocial">Add link</span><span aria-hidden="true">+</span></button>
+                  </div>
+                  <div class="social-link-list" id="editMemberSocialList" aria-live="polite"></div>
+                </fieldset>
+                <button class="button button-primary" id="editMemberSubmit" type="submit"><span data-i18n="admin.saveMember">Save member details</span><span aria-hidden="true">✓</span></button>
+                <p class="admin-tool-status" id="editMemberStatus" role="status" aria-live="polite"></p>
+              </form>
+            </section>
+          </div>
+        </div>
+        <div class="admin-tool-modal" id="socialsTool" role="dialog" aria-modal="true" aria-labelledby="socialToolsTitle" hidden>
+          <div class="admin-tool-dialog">
+            <div class="admin-tool-dialog-heading"><div><p class="eyebrow" data-i18n="admin.socialToolsEyebrow">MEMBER SOCIALS</p><h3 id="socialToolsTitle" data-i18n="admin.socialToolsTitle">Manage social links</h3></div><button class="admin-tool-close" type="button" data-close-admin-tool data-i18n-aria-label="admin.closeTool">×</button></div>
+            <section class="admin-tool-card" aria-labelledby="socialToolsTitle">
+              <p class="eyebrow" data-i18n="admin.socialToolsEyebrow">MEMBER SOCIALS</p>
+              <h3 data-i18n="admin.socialToolsTitle">Manage social links</h3>
+              <p data-i18n="admin.socialToolsCopy">Pick a member, choose Facebook, Discord, or TikTok, and save the profile link.</p>
+              <div class="admin-tool-form">
+                <label><span data-i18n="admin.socialMemberLabel">Member</span><select id="socialMember"></select></label>
+                <label><span data-i18n="admin.socialPlatformLabel">Platform</span><select id="socialPlatform"><option value="facebook" data-i18n="social.facebook">Facebook</option><option value="discord" data-i18n="social.discord">Discord</option><option value="tiktok" data-i18n="social.tiktok">TikTok</option></select></label>
+                <label><span data-i18n="admin.socialUrlLabel">Profile URL</span><input id="socialUrl" type="url" data-i18n-placeholder="admin.socialUrlPlaceholder" placeholder="https://..."></label>
+                <button class="button button-primary" id="saveSocialLink" type="button"><span data-i18n="admin.saveSocial">Save social link</span><span aria-hidden="true">↗</span></button>
+                <p class="admin-tool-status" id="socialStatus" role="status" aria-live="polite"></p>
+              </div>
+              <div class="social-link-list existing-social-list" id="socialLinksList"></div>
+            </section>
+          </div>
+        </div>
+        <div class="admin-tool-modal" id="postsTool" role="dialog" aria-modal="true" aria-labelledby="postToolsTitle" hidden>
+          <div class="admin-tool-dialog">
+            <div class="admin-tool-dialog-heading"><div><p class="eyebrow" data-i18n="admin.moodboardToolsEyebrow">SNAPSHOTS FROM OUR ORBIT</p><h3 data-i18n="admin.moodboardToolsTitle">Update the moodboard</h3></div><button class="admin-tool-close" type="button" data-close-admin-tool data-i18n-aria-label="admin.closeTool">×</button></div>
+          <section class="admin-tool-card" aria-labelledby="postToolsTitle">
+            <p class="eyebrow" data-i18n="admin.moodboardToolsEyebrow">SNAPSHOTS FROM OUR ORBIT</p>
+            <h3 id="postToolsTitle" data-i18n="admin.moodboardToolsTitle">Update the moodboard</h3>
+            <p data-i18n="admin.moodboardToolsCopy">Upload a photo here and the newest four admin uploads will fill the main moodboard cards.</p>
+            <form class="admin-tool-form" id="postForm">
+              <label><span data-i18n="admin.postTitleLabel">Photo title</span><input id="postTitle" name="title" required maxlength="80" data-i18n-placeholder="admin.postTitlePlaceholder"></label>
+              <label><span data-i18n="admin.postDescriptionLabel">Description</span><textarea id="postDescription" name="description" rows="3" maxlength="240" required data-i18n-placeholder="admin.postDescriptionPlaceholder"></textarea></label>
+              <label><span data-i18n="admin.postImageLabel">Photo</span><input id="postFile" name="photo" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required></label>
+              <button class="button button-primary" type="submit"><span data-i18n="admin.postPhoto">Post photo</span><span aria-hidden="true">↑</span></button>
+              <p class="admin-tool-status" id="postStatus" role="status" aria-live="polite"></p>
+            </form>
+            <section class="post-removal" aria-labelledby="postRemovalTitle">
+              <div class="post-removal-heading">
+                <p class="eyebrow" data-i18n="admin.postRemoveEyebrow">MOODBOARD CLEANUP</p>
+                <h4 id="postRemovalTitle" data-i18n="admin.postRemoveTitle">Remove a post</h4>
+                <p data-i18n="admin.postRemoveCopy">Delete an uploaded photo from the live moodboard.</p>
+              </div>
+              <div class="post-admin-list" id="postAdminList"></div>
+              <p class="admin-tool-status" id="postRemoveStatus" role="status" aria-live="polite"></p>
+            </section>
+          </section>
+          </div>
+        </div>
       </section>
+    </section>
+  </div>
+  <div class="modal-backdrop member-profile-backdrop" id="memberProfileModal" hidden>
+    <section class="member-profile-card" role="dialog" aria-modal="true" aria-labelledby="memberProfileName">
+      <button class="modal-close" id="closeMemberProfile" type="button" data-i18n-aria-label="members.closeProfile">×</button>
+      <div class="member-profile-portrait"><img id="memberProfileImage" alt=""></div>
+      <div class="member-profile-copy">
+        <span class="member-badge" id="memberProfileBadge"></span>
+        <h2 id="memberProfileName"></h2>
+        <span class="profile-field-label" data-i18n="members.positionLabel">Position</span>
+        <p id="memberProfileRole"></p>
+        <div class="profile-socials" id="memberProfileSocials"></div>
+      </div>
+    </section>
+  </div>
+  <div class="lightbox-backdrop" id="galleryLightbox" hidden>
+    <section class="lightbox-dialog" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
+      <button class="lightbox-close" id="closeLightbox" type="button" data-i18n-aria-label="gallery.lightboxClose" aria-label="Close full-screen photo">×</button>
+      <figure class="lightbox-figure">
+        <img id="lightboxImage" class="lightbox-image" alt="">
+        <figcaption class="lightbox-caption">
+          <span id="lightboxLabel" data-i18n="gallery.postLabel">HUDAS photo</span>
+          <h2 id="lightboxTitle"></h2>
+          <p id="lightboxDescription"></p>
+        </figcaption>
+      </figure>
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
