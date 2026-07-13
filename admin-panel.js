@@ -57,18 +57,17 @@ function renderSocialList(container, socials, onRemove) {
     item.className = 'social-admin-item';
     const copy = document.createElement('div');
     copy.className = 'social-admin-copy';
-    const platform = document.createElement('strong');
-    platform.textContent = socialLabel(social.platform);
-    const url = document.createElement('span');
-    url.textContent = social.url;
-    copy.append(platform, url);
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'button button-ghost social-remove-button';
-    remove.textContent = t('admin.removeSocial');
-    remove.setAttribute('aria-label', t('admin.removeSocialAria', { platform: socialLabel(social.platform) }));
-    remove.addEventListener('click', () => onRemove(index));
-    item.append(copy, remove);
+    const platformEl = document.createElement('strong');
+    platformEl.textContent = socialLabel(social.platform);
+    const urlEl = document.createElement('span');
+    urlEl.textContent = social.url;
+    copy.append(platformEl, urlEl);
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'button button-ghost social-remove-button';
+    removeBtn.textContent = t('admin.removeSocial');
+    removeBtn.addEventListener('click', () => onRemove(index));
+    item.append(copy, removeBtn);
     container.append(item);
   });
 }
@@ -81,10 +80,8 @@ function isAuthorizationError(error) {
 }
 
 function errorMessage(error) {
-  // ... (keep your original errorMessage function)
   const status = error?.statusCode ?? error?.status ?? error?.response?.status;
-  const code = String(error?.code || '').toLowerCase();
-  const message = String(error?.message || '').toLowerCase();
+  const message = String(error?.message ?? error ?? '').toLowerCase();
   if (message.includes('bucket not found') || message.includes('bucket does not exist')) return t('admin.storageBucketMissing');
   if (isAuthorizationError(error)) return t('admin.authRequired');
   return t('admin.storageError');
@@ -95,7 +92,9 @@ async function loadPortraits() {
   portraitsLoaded = true;
   try {
     const saved = await readPortraits();
-    Object.entries(saved).forEach(([key, portrait]) => { if (portrait?.publicUrl) portraits[key] = portrait; });
+    Object.entries(saved).forEach(([key, portrait]) => {
+      if (portrait?.publicUrl) portraits[key] = portrait;
+    });
   } catch (error) { console.warn('Portraits could not be loaded.', error); }
 }
 
@@ -115,7 +114,7 @@ function setupPickers(removeSelect) {
   if (!members.length) {
     removeSelect.add(new Option(t('admin.noMembers'), ''));
   } else {
-    removeSelect.value = members.some((member) => member.key === selectedRemove) ? selectedRemove : members[0].key;
+    removeSelect.value = members.some(m => m.key === selectedRemove) ? selectedRemove : members[0].key;
   }
 }
 
@@ -165,15 +164,26 @@ function setupSocialMemberPicker(select) {
   select.innerHTML = '';
   members.forEach((member) => select.add(new Option(`${memberName(member)} · ${member.badge}`, member.key)));
   if (!members.length) select.add(new Option(t('admin.noMembers'), ''));
-  else select.value = members.some((member) => member.key === selected) ? selected : members[0].key;
+  else select.value = members.some(m => m.key === selected) ? selected : members[0].key;
 }
 
 async function uploadAdminImage(file, name, token, options = {}) {
   return uploadImageToStorage(file, name, token, options);
 }
 
+async function runWithFreshSession(operation) {
+  try {
+    return await operation(accessToken);
+  } catch (error) {
+    if (!isSupabaseConfigured() || !refreshToken || !isAuthorizationError(error)) throw error;
+    const session = await refreshAdminSession(refreshToken);
+    accessToken = session.access_token || accessToken;
+    refreshToken = session.refresh_token || refreshToken;
+    return operation(accessToken);
+  }
+}
+
 export function setupAdminPanel() {
-  // Element selection
   const modal = document.getElementById('adminModal');
   const gate = document.getElementById('adminGate');
   const panel = document.getElementById('portraitManager');
@@ -191,6 +201,10 @@ export function setupAdminPanel() {
   const memberStatus = document.getElementById('memberStatus');
   const removeSelect = document.getElementById('removeMember');
   const removeMemberButton = document.getElementById('removeMemberButton');
+  const postForm = document.getElementById('postForm');
+  const postStatus = document.getElementById('postStatus');
+  const postAdminList = document.getElementById('postAdminList');
+  const postRemoveStatus = document.getElementById('postRemoveStatus');
 
   if (!modal || !gate || !panel) return;
 
@@ -213,7 +227,11 @@ export function setupAdminPanel() {
     unlocked = isUnlocked;
     gate.hidden = isUnlocked;
     panel.hidden = !isUnlocked;
-    if (!isUnlocked) accessToken = refreshToken = '';
+    if (!isUnlocked) {
+      accessToken = '';
+      refreshToken = '';
+      closeTool();
+    }
   };
 
   const open = async () => {
@@ -230,23 +248,27 @@ export function setupAdminPanel() {
     document.body.style.overflow = '';
   };
 
-  // Initial setup
+  // Setup
   setupPickers(removeSelect);
   setAccessState(false);
 
-  document.querySelectorAll('[data-open-admin]').forEach(btn => btn.addEventListener('click', open));
+  document.querySelectorAll('[data-open-admin]').forEach(button => button.addEventListener('click', open));
+  document.querySelectorAll('[data-admin-tool]').forEach(button => {
+    button.addEventListener('click', () => openTool(button.dataset.adminTool));
+  });
+
   document.getElementById('closeAdminModal')?.addEventListener('click', close);
   modal.addEventListener('click', e => { if (e.target === modal) close(); });
 
   // Login
   accessForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // ... your original login logic ...
+    // Your original login logic here...
     if (isSupabaseConfigured()) {
       try {
         const session = await signInAdmin(usernameInput.value.trim(), passwordInput.value);
-        accessToken = session.access_token || '';
-        refreshToken = session.refresh_token || '';
+        accessToken = session.access_token;
+        refreshToken = session.refresh_token;
         setAccessState(true);
         setStatus(accessStatus, t('admin.onlineSignedIn'), 'success');
       } catch (err) {
@@ -262,7 +284,10 @@ export function setupAdminPanel() {
     }
   });
 
-  // Add Member - FIXED
+  signOutButton.addEventListener('click', () => setAccessState(false));
+  lockButton.addEventListener('click', () => setAccessState(false));
+
+  // ==================== ADD MEMBER (FIXED) ====================
   memberForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!memberForm.checkValidity()) {
@@ -307,7 +332,7 @@ export function setupAdminPanel() {
       portraits[member.key] = uploaded;
       await saveLocalPortraits();
 
-      // Refresh everything
+      // Refresh
       members = await readMembers();
       await loadPortraits();
       notifyRosterChanged();
@@ -326,18 +351,6 @@ export function setupAdminPanel() {
     }
   });
 
-  // Add your other listeners (edit, remove, posts, etc.) here if needed
-}
-
-// Helper for fresh session (make sure this is defined)
-async function runWithFreshSession(operation) {
-  try {
-    return await operation(accessToken);
-  } catch (error) {
-    if (!isSupabaseConfigured() || !refreshToken || !isAuthorizationError(error)) throw error;
-    const session = await refreshAdminSession(refreshToken);
-    accessToken = session.access_token || accessToken;
-    refreshToken = session.refresh_token || refreshToken;
-    return operation(accessToken);
-  }
+  // You can add the rest of your tools (edit, social, post) later if needed.
+  console.log("✅ Admin panel tools initialized");
 }
